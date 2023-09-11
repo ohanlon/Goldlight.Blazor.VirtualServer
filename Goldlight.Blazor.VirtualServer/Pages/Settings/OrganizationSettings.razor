@@ -1,0 +1,29 @@
+﻿@page "/settings/organization"
+@using Goldlight.Blazor.VirtualServer.Api
+@using Goldlight.Blazor.VirtualServer.Models
+
+@inject OrganizationApi OrganizationApi
+
+<PageTitle>Organization</PageTitle>
+
+<DataContainer HasData="@(organization is not null)">
+  <NoData>
+    <MudText>No organization details present</MudText>
+  </NoData>
+  <DataTemplate>
+    <MudText Typo="Typo.h2">Organization details</MudText>
+    <MudText Typo="Typo.h3">Name:</MudText>
+    <MudText>@organization!.Name</MudText>
+    <MudText Typo="Typo.h2">API</MudText>
+    <MudText Typo="Typo.h3">API Key:</MudText>
+    <MudText>@organization!.ApiKey</MudText>
+  </DataTemplate>
+</DataContainer>
+
+@code {
+  private ExtendedOrganization? organization;
+  protected override async Task OnInitializedAsync()
+  {
+    organization = await OrganizationApi.GetOrganizationAsync("goldlight");
+  }
+}

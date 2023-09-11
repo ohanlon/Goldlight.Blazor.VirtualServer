@@ -1,0 +1,24 @@
+﻿@page "/projects/addproject"
+
+<PageTitle>Add project</PageTitle>
+
+<EditForm Model="@project" OnValidSubmit="OnValidSubmit">
+  <DataAnnotationsValidator/>
+  <MudCard>
+    <MudCardContent>
+      <MudTextField Label="Project name" @bind-Value="project.Name" />
+      <MudTextField Label="Friendly name" @bind-Value="project.FriendlyName" ReadOnly />
+      <MudTextField Label="Project description" @bind-Value="project.Description" />
+      <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Add project</MudButton>
+    </MudCardContent>
+  </MudCard>
+</EditForm>
+
+@code {
+
+  Project project = new();
+  private void OnValidSubmit(EditContext context)
+  {
+    StateHasChanged();
+  }
+}
