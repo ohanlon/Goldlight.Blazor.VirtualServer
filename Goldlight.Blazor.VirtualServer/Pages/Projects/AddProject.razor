@@ -1,24 +1,26 @@
 ﻿@page "/projects/addproject"
-
+@inject NavigationManager NavigationManager
 <PageTitle>Add project</PageTitle>
 
 <EditForm Model="@project" OnValidSubmit="OnValidSubmit">
   <DataAnnotationsValidator/>
   <MudCard>
     <MudCardContent>
-      <MudTextField Label="Project name" @bind-Value="project.Name" />
-      <MudTextField Label="Friendly name" @bind-Value="project.FriendlyName" ReadOnly />
-      <MudTextField Label="Project description" @bind-Value="project.Description" />
-      <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Add project</MudButton>
+      <MudTextField Label="Project name" @bind-Value="project.Name" For="@(() => project.Name)"/>
+      <MudTextField Label="Friendly name" @bind-Value="project.FriendlyName" For="@(() => project.FriendlyName)"/>
+      <UrlFriendlyProject Project="@project"></UrlFriendlyProject>
+      <MudTextField Label="Project description" Lines="10" @bind-Value="project.Description" For="@(() => project.Description)"/>
+      <MudButton StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Disabled="@(!context.IsModified() || !context.Validate())" Class="mt-2">Add project</MudButton>
     </MudCardContent>
   </MudCard>
 </EditForm>
 
 @code {
 
-  Project project = new();
+  readonly Project project = new();
+
   private void OnValidSubmit(EditContext context)
   {
-    StateHasChanged();
+    NavigationManager.NavigateTo("/");
   }
 }

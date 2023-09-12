@@ -1,0 +1,18 @@
+﻿@inject OrganizationApi OrganizationApi
+
+<DataContainer HasData="organization is not null">
+  <DataTemplate>
+    <MudText>http://localhost:5601/@organization!.Id/@Project.UrlName</MudText>
+  </DataTemplate>
+</DataContainer>
+
+@code {
+  [Parameter]
+  public Project Project { get; set; } = new();
+
+  private ExtendedOrganization? organization;
+  protected override async Task OnInitializedAsync()
+  {
+    organization = await OrganizationApi.GetOrganizationAsync("goldlight");
+  }
+}

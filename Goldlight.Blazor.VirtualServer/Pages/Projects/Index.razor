@@ -1,11 +1,8 @@
 ﻿@page "/"
-@using Goldlight.Blazor.VirtualServer.Api
-@using Goldlight.Blazor.VirtualServer.Models
 
-@inject OrganizationApi OrganizationApi
 <PageTitle>Projects</PageTitle>
 
-<MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc">
+<MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc" Style="align-items: center;">
   <ToolBarContent>
     <MudText Typo="Typo.h6">Projects</MudText>
     <MudSpacer/>
@@ -18,11 +15,7 @@
     <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name"/>
     <TemplateColumn Title="Base URL">
       <CellTemplate>
-        <DataContainer HasData="organization != null">
-          <DataTemplate>
-            <MudText>http://localhost:5601/@organization!.Id/@context.Item.FriendlyName</MudText>
-          </DataTemplate>
-        </DataContainer>
+        <UrlFriendlyProject Project="context.Item"></UrlFriendlyProject>
       </CellTemplate>
     </TemplateColumn>
   </Columns>
@@ -32,15 +25,7 @@
 @code {
 
   private readonly Projects projects = new();
-  private ExtendedOrganization? organization;
   private string? searchString;
 
-  protected override async Task OnInitializedAsync()
-  {
-    organization = await OrganizationApi.GetOrganizationAsync("goldlight");
-  }
-
-
   private Func<Project, bool> QuickFilterFunc => row => string.IsNullOrWhiteSpace(searchString) || row.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) || row.FriendlyName.Contains(searchString, StringComparison.OrdinalIgnoreCase);
-
 }
