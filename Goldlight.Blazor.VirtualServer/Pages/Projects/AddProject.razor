@@ -1,5 +1,6 @@
 ﻿@page "/projects/addproject"
 @inject NavigationManager NavigationManager
+@inject ProjectApi ProjectApi
 <PageTitle>Add project</PageTitle>
 
 <EditForm Model="@project" OnValidSubmit="OnValidSubmit">
@@ -8,19 +9,21 @@
     <MudCardContent>
       <MudTextField Label="Project name" @bind-Value="project.Name" For="@(() => project.Name)"/>
       <MudTextField Label="Friendly name" @bind-Value="project.FriendlyName" For="@(() => project.FriendlyName)"/>
-      <UrlFriendlyProject Project="@project"></UrlFriendlyProject>
+      <UrlFriendlyProject Project="@project" />
       <MudTextField Label="Project description" Lines="10" @bind-Value="project.Description" For="@(() => project.Description)"/>
-      <MudButton StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Disabled="@(!context.IsModified() || !context.Validate())" Class="mt-2">Add project</MudButton>
+      <MudButton Disabled="submitted" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-2">Add project</MudButton>
     </MudCardContent>
   </MudCard>
 </EditForm>
 
 @code {
 
-  readonly Project project = new();
-
-  private void OnValidSubmit(EditContext context)
+  readonly Project project = new() { Organization = "goldlight" };
+  bool submitted;
+  private async Task OnValidSubmit(EditContext context)
   {
+    submitted = true;
+    await ProjectApi.SaveProject(project);
     NavigationManager.NavigateTo("/");
   }
 }

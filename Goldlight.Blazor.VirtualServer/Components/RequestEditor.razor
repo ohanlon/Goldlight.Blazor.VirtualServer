@@ -1,0 +1,47 @@
+﻿@using System.ComponentModel
+@using Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs
+
+<EditForm Model="Request" OnInvalidSubmit="OnValidSubmit">
+  <DataAnnotationsValidator/>
+  <MudTextField Label="Name" @bind-Value="Request.Summary.Name" For="@(()=> Request.Summary.Name)" />
+  <MudTextField Label="Description" Lines="3" @bind-Value="Request.Summary.Description" For="@(()=> Request.Summary.Description)" />
+  <MudSelect @bind-Value="Request.Summary.Method">
+    @foreach (string method in httpMethods)
+    {
+      <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
+    }
+  </MudSelect>
+  <MudTextField Label="Path" @bind-Value="Request.Summary.Path" For="@(() => Request.Summary.Path)" />
+  <MudExpansionPanels Dense="true" Class="mt-0" Elevation="0">
+    <MudExpansionPanel Dense="true" Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="headerExpanded">
+      <MudDataGrid T="HttpHeader" Items="Request.Headers" Style="align-items: center;">
+        <Columns>
+          <PropertyColumn Property="hdr => hdr.Name"/>
+          <PropertyColumn Property="hdr => hdr.Value"/>
+        </Columns>
+      </MudDataGrid>
+    </MudExpansionPanel>
+  </MudExpansionPanels>
+  <MudTextField Label="Content" @bind-Value="Request.Content" For="@(()=> Request.Content)" Lines="20" />
+</EditForm>
+
+@code {
+  private bool headerExpanded = true;
+  private readonly string[] httpMethods =
+  {
+    "POST",
+    "GET",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+    "ANY"
+  };
+
+  [Parameter]
+  public Request Request { get; set; } = new();
+
+  private void OnValidSubmit()
+  {
+  }
+}
