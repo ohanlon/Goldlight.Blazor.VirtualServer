@@ -15,7 +15,7 @@ public class RequestHandler
     {
       string line = lines[0];
       lines = lines.Skip(1).ToArray();
-      if (request.Summary is null && !string.IsNullOrWhiteSpace(line))
+      if (string.IsNullOrWhiteSpace(request.Summary.Method) && !string.IsNullOrWhiteSpace(line))
       {
         request.Summary = new HttpRequestLineParser().Parse(line);
         continue;
@@ -28,7 +28,10 @@ public class RequestHandler
           continue;
         }
         var headerLine = headerParser.Parse(line);
-        request.Headers.Add(headerLine);
+        if (headerLine != null)
+        {
+          request.Headers.Add(headerLine);
+        }
         continue;
       }
       request.Content = string.Concat(lines);

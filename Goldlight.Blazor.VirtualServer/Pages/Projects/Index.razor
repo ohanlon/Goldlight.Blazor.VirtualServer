@@ -32,8 +32,8 @@
             @foreach (RequestResponsePair rrpair in context.Item.RequestResponses)
             {
               <MudCard>
-                <MudText Typo="Typo.h3">@rrpair.Request.Summary.Name</MudText>
-                <MudText Typo="Typo.body1">@rrpair.Request.Summary.Description</MudText>
+                <MudText Typo="Typo.h3">@rrpair.Name</MudText>
+                <MudText Typo="Typo.body1">@rrpair.Description</MudText>
                 <MudText Typo="Typo.body2">@rrpair.Request.Summary.Method</MudText>
               </MudCard>
             }

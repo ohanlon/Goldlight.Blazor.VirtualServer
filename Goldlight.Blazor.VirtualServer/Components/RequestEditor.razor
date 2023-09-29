@@ -1,32 +1,77 @@
-﻿@using System.ComponentModel
-@using Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs
+﻿@inject ProjectState ProjectState
+@inject NavigationManager NavigationManager
 
-<EditForm Model="Request" OnInvalidSubmit="OnValidSubmit">
-  <DataAnnotationsValidator/>
-  <MudTextField Label="Name" @bind-Value="Request.Summary.Name" For="@(()=> Request.Summary.Name)" />
-  <MudTextField Label="Description" Lines="3" @bind-Value="Request.Summary.Description" For="@(()=> Request.Summary.Description)" />
-  <MudSelect @bind-Value="Request.Summary.Method">
-    @foreach (string method in httpMethods)
-    {
-      <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
-    }
-  </MudSelect>
-  <MudTextField Label="Path" @bind-Value="Request.Summary.Path" For="@(() => Request.Summary.Path)" />
-  <MudExpansionPanels Dense="true" Class="mt-0" Elevation="0">
-    <MudExpansionPanel Dense="true" Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="headerExpanded">
-      <MudDataGrid T="HttpHeader" Items="Request.Headers" Style="align-items: center;">
-        <Columns>
-          <PropertyColumn Property="hdr => hdr.Name"/>
-          <PropertyColumn Property="hdr => hdr.Value"/>
-        </Columns>
-      </MudDataGrid>
-    </MudExpansionPanel>
-  </MudExpansionPanels>
-  <MudTextField Label="Content" @bind-Value="Request.Content" For="@(()=> Request.Content)" Lines="20" />
+<EditForm Model="requestResponse" OnInvalidSubmit="OnValidSubmit">
+  <DataAnnotationsValidator />
+  <MudGrid>
+    <MudItem xs="12">
+      <MudTextField Label="Name" @bind-Value="requestResponse.Name" For="@(()=> requestResponse.Name)" />
+      <MudTextField Label="Description" Lines="3" @bind-Value="requestResponse.Description" For="@(()=> requestResponse.Description)" />
+    </MudItem>
+    <MudItem xs="6">
+      <DataContainer HasData="!EditMode">
+        <DataTemplate>
+          <UploadRequestResponse FileTypes=".json, .request" OnRequestUploaded="OnRequestUploaded" Upload="UploadRequestResponse.UploadType.Request"/>
+        </DataTemplate>
+      </DataContainer>
+      <DataContainer HasData="@(requestResponse.Request is not null)">
+        <DataTemplate>
+          <MudSelect @bind-Value="requestResponse.Request!.Summary.Method">
+            @foreach (string method in httpMethods)
+            {
+              <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
+            }
+          </MudSelect>
+          <MudTextField Label="Path" @bind-Value="requestResponse.Request!.Summary.Path" For="@(() => requestResponse.Request!.Summary.Path)"/>
+          <MudExpansionPanels Dense="true" Class="mt-0" Elevation="0">
+            <MudExpansionPanel Dense="true" Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="requestHeaderExpanded">
+              <MudDataGrid T="HttpHeader" Items="requestResponse.Request!.Headers" Style="align-items: center;">
+                <Columns>
+                  <PropertyColumn Property="hdr => hdr.Name"/>
+                  <PropertyColumn Property="hdr => hdr.Value"/>
+                </Columns>
+              </MudDataGrid>
+            </MudExpansionPanel>
+          </MudExpansionPanels>
+          <MudTextField Label="Content" @bind-Value="requestResponse.Request!.Content" For="@(() => requestResponse.Request!.Content)" Lines="20"/>
+        </DataTemplate>
+      </DataContainer>
+    </MudItem>
+    <MudItem xs="6">
+      <DataContainer HasData="!EditMode">
+        <DataTemplate>
+          <UploadRequestResponse FileTypes=".json, .response" ButtonText="Upload Response" OnResponseUploaded="OnResponseUploaded" Upload="UploadRequestResponse.UploadType.Response"/>
+        </DataTemplate>
+      </DataContainer>
+      <DataContainer HasData="@(requestResponse.Response is not null)">
+        <DataTemplate>
+          <MudTextField Label="Name" @bind-Value="requestResponse.Response!.Summary.Version" For="@(() => requestResponse.Response!.Summary.Version)"/>
+          <MudTextField Label="Path" @bind-Value="requestResponse.Response!.Summary.Status" For="@(() => requestResponse.Response!.Summary.Status)"/>
+          <MudExpansionPanels Dense="true" Class="mt-0" Elevation="0">
+            <MudExpansionPanel Dense="true" Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="responseHeaderExpanded">
+              <MudDataGrid T="HttpHeader" Items="requestResponse.Response!.Headers" Style="align-items: center;">
+                <Columns>
+                  <PropertyColumn Property="hdr => hdr.Name"/>
+                  <PropertyColumn Property="hdr => hdr.Value"/>
+                </Columns>
+              </MudDataGrid>
+            </MudExpansionPanel>
+          </MudExpansionPanels>
+          <MudTextField Label="Content" @bind-Value="requestResponse.Response!.Content" For="@(() => requestResponse.Response!.Content)" Lines="20"/>
+        </DataTemplate>
+      </DataContainer>
+    </MudItem>
+  </MudGrid>
+  <MudButton Disabled="submitted" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-2">Save</MudButton>
 </EditForm>
 
 @code {
-  private bool headerExpanded = true;
+  [Parameter] public bool EditMode { get; set; }
+  readonly RequestResponsePair requestResponse = new();
+  private bool requestHeaderExpanded = true;
+  private bool responseHeaderExpanded = true;
+  Project? project;
+  bool submitted;
   private readonly string[] httpMethods =
   {
     "POST",
@@ -38,10 +83,30 @@
     "ANY"
   };
 
-  [Parameter]
-  public Request Request { get; set; } = new();
+  protected override Task OnInitializedAsync()
+  {
+    if (ProjectState.SelectedProject is null)
+    {
+      NavigationManager.NavigateTo("/");
+    }
+    project = ProjectState.SelectedProject!;
+    project.RequestResponses.Add(requestResponse);
+    return Task.CompletedTask;
+  }
 
   private void OnValidSubmit()
   {
+    submitted = true;
+    NavigationManager.NavigateTo("/");
+  }
+
+  private void OnResponseUploaded(Response response)
+  {
+    requestResponse.Response = response;
+  }
+
+  private void OnRequestUploaded(Request request)
+  {
+    requestResponse.Request = request;
   }
 }
