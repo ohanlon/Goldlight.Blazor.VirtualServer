@@ -1,7 +1,7 @@
 ﻿@inject ProjectState ProjectState
 @inject NavigationManager NavigationManager
 
-<EditForm Model="requestResponse" OnInvalidSubmit="OnValidSubmit">
+<EditForm Model="requestResponse" OnValidSubmit="OnValidSubmit">
   <DataAnnotationsValidator />
   <MudGrid>
     <MudItem xs="12">
@@ -16,7 +16,7 @@
       </DataContainer>
       <DataContainer HasData="@(requestResponse.Request is not null)">
         <DataTemplate>
-          <MudSelect @bind-Value="requestResponse.Request!.Summary.Method">
+          <MudSelect Dense="true" @bind-Value="requestResponse.Request!.Summary.Method">
             @foreach (string method in httpMethods)
             {
               <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
@@ -25,7 +25,7 @@
           <MudTextField Label="Path" @bind-Value="requestResponse.Request!.Summary.Path" For="@(() => requestResponse.Request!.Summary.Path)"/>
           <MudExpansionPanels Dense="true" Class="mt-0" Elevation="0">
             <MudExpansionPanel Dense="true" Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="requestHeaderExpanded">
-              <MudDataGrid T="HttpHeader" Items="requestResponse.Request!.Headers" Style="align-items: center;">
+              <MudDataGrid Dense="true" T="HttpHeader" Items="requestResponse.Request!.Headers" Style="align-items: center;">
                 <Columns>
                   <PropertyColumn Property="hdr => hdr.Name"/>
                   <PropertyColumn Property="hdr => hdr.Value"/>
@@ -45,11 +45,11 @@
       </DataContainer>
       <DataContainer HasData="@(requestResponse.Response is not null)">
         <DataTemplate>
-          <MudTextField Label="Name" @bind-Value="requestResponse.Response!.Summary.Version" For="@(() => requestResponse.Response!.Summary.Version)"/>
-          <MudTextField Label="Path" @bind-Value="requestResponse.Response!.Summary.Status" For="@(() => requestResponse.Response!.Summary.Status)"/>
+          <MudTextField Label="Version" @bind-Value="requestResponse.Response!.Summary.Version" For="@(() => requestResponse.Response!.Summary.Version)"/>
+          <MudTextField Label="Status" @bind-Value="requestResponse.Response!.Summary.Status" For="@(() => requestResponse.Response!.Summary.Status)"/>
           <MudExpansionPanels Dense="true" Class="mt-0" Elevation="0">
             <MudExpansionPanel Dense="true" Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="responseHeaderExpanded">
-              <MudDataGrid T="HttpHeader" Items="requestResponse.Response!.Headers" Style="align-items: center;">
+              <MudDataGrid Dense="true" T="HttpHeader" Items="requestResponse.Response!.Headers" Style="align-items: center;">
                 <Columns>
                   <PropertyColumn Property="hdr => hdr.Name"/>
                   <PropertyColumn Property="hdr => hdr.Value"/>

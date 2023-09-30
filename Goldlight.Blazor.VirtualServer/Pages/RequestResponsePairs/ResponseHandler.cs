@@ -35,7 +35,7 @@ public class ResponseHandler
 
         continue;
       }
-      response.Content = string.Concat(lines);
+      response.Content = line + string.Concat(lines);
       break;
     }
     return response;

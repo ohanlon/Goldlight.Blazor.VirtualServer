@@ -34,7 +34,7 @@ public class RequestHandler
         }
         continue;
       }
-      request.Content = string.Concat(lines);
+      request.Content = line + string.Concat(lines);
       break;
     }
     return request;
