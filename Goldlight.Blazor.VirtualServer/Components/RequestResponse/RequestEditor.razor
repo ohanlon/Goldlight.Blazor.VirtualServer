@@ -1,0 +1,121 @@
+﻿@using Goldlight.Blazor.VirtualServer.Components.RequestResponse.Validator
+@inject ProjectState ProjectState
+@inject NavigationManager NavigationManager
+@inject ProjectApi ProjectApi
+
+<MudForm @ref="form" Model="requestResponse" Validation="@(validator.ValidateValue)" ValidationDelay="0">
+  <MudGrid>
+    <MudItem xs="12">
+      <MudTextField Label="Name" Immediate @bind-Value="requestResponse.Name" For="@(() => requestResponse.Name)"/>
+       <MudTextField Label="Description" Immediate Lines="3" @bind-Value="requestResponse.Description" For="@(() => requestResponse.Description)" />
+    </MudItem>
+    <MudItem xs="6">
+      <DataContainer HasData="!EditMode">
+        <DataTemplate>
+          <UploadRequestResponse FileTypes=".json, .request" OnRequestUploaded="OnRequestUploadedAsync" Upload="UploadRequestResponse.UploadType.Request"/>
+        </DataTemplate>
+      </DataContainer>
+      <MudSelect Dense Immediate @bind-Value="requestResponse.Request.Summary.Method" For="() => requestResponse.Request.Summary.Method">
+        @foreach (string method in httpMethods)
+        {
+          <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
+        }
+      </MudSelect>
+      <MudTextField Label="Path" @bind-Value="requestResponse.Request.Summary.Path" For="@(() => requestResponse.Request.Summary.Path)"/>
+      <MudExpansionPanels Dense="true" Class="mt-0" Elevation="0">
+        <MudExpansionPanel Dense="true" Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="requestHeaderExpanded">
+          <MudDataGrid Dense="true" T="HttpHeader" Items="requestResponse.Request.Headers" Style="align-items: center;">
+            <Columns>
+              <PropertyColumn Property="hdr => hdr.Name"/>
+              <PropertyColumn Property="hdr => hdr.Value"/>
+            </Columns>
+          </MudDataGrid>
+        </MudExpansionPanel>
+      </MudExpansionPanels>
+       <MudTextField Label="Content" Immediate @bind-Value="requestResponse.Request.Content" For="@(() => requestResponse.Request.Content)" Lines="20" />
+    </MudItem>
+    <MudItem xs="6">
+      <DataContainer HasData="!EditMode">
+        <DataTemplate>
+          <UploadRequestResponse FileTypes=".json, .response" ButtonText="Upload Response" OnResponseUploaded="OnResponseUploadedAsync" Upload="UploadRequestResponse.UploadType.Response"/>
+        </DataTemplate>
+      </DataContainer>
+       <MudTextField Label="Version" Immediate @bind-Value="requestResponse.Response.Summary.Version" For="@(() => requestResponse.Response.Summary.Version)" />
+       <MudTextField Label="Status" Immediate @bind-Value="requestResponse.Response.Summary.Status" For="@(() => requestResponse.Response.Summary.Status)" />
+      <MudExpansionPanels Dense Class="mt-0" Elevation="0">
+        <MudExpansionPanel Dense Class="mt-0 pl=0" DisableGutters="true" Text="Headers" @bind-IsExpanded="responseHeaderExpanded">
+          <MudDataGrid Dense T="HttpHeader" Items="requestResponse.Response.Headers" Style="align-items: center;">
+            <Columns>
+              <PropertyColumn Property="hdr => hdr.Name"/>
+              <PropertyColumn Property="hdr => hdr.Value"/>
+            </Columns>
+          </MudDataGrid>
+        </MudExpansionPanel>
+      </MudExpansionPanels>
+       <MudTextField Label="Content" Immediate @bind-Value="requestResponse.Response.Content" For="@(() => requestResponse.Response.Content)" Lines="20" />
+    </MudItem>
+  </MudGrid>
+  <MudButton Disabled="submitted" OnClick="(async () => await OnSubmitAsync())" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">Save</MudButton>
+</MudForm>
+
+@code {
+  [Parameter] public bool EditMode { get; set; }
+  readonly RequestResponsePair requestResponse = new();
+  private bool requestHeaderExpanded = true;
+  private bool responseHeaderExpanded = true;
+  Project? project;
+  bool submitted;
+  MudForm form = null!;
+  RequestResponsePairValidator validator = new();
+  private readonly string[] httpMethods =
+  {
+    "POST",
+    "GET",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+    "ANY"
+  };
+
+  protected override Task OnInitializedAsync()
+  {
+    if (ProjectState.SelectedProject is null)
+    {
+      NavigationManager.NavigateTo("/");
+    }
+    project = ProjectState.SelectedProject!;
+    if (project.RequestResponses is null)
+    {
+      project.RequestResponses = new();
+    }
+    project.RequestResponses.Add(requestResponse);
+    return Task.CompletedTask;
+  }
+
+  private async Task OnSubmitAsync()
+  {
+    submitted = true;
+    await form.Validate();
+    if (form.IsValid)
+    {
+      await ProjectApi.UpdateProject(project);
+      NavigationManager.NavigateTo("/");
+    }
+    submitted = false;
+  }
+
+  private async Task OnResponseUploadedAsync(Response response)
+  {
+    requestResponse.Response = response;
+    StateHasChanged();
+    await form.Validate();
+  }
+
+  private async Task OnRequestUploadedAsync(Request request)
+  {
+    requestResponse.Request = request;
+    StateHasChanged();
+    await form.Validate();
+  }
+}

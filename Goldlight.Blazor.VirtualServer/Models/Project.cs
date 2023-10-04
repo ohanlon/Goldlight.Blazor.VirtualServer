@@ -1,6 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Runtime.Serialization;
+using Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 
 namespace Goldlight.Blazor.VirtualServer.Models;
 
@@ -15,7 +16,7 @@ public class Project
   public string? Name { get; set; }
   [Required, DataMember]
   public string? FriendlyName { get; set; }
-  [Required, DataMember] public List<RequestResponsePair> RequestResponses { get; set; } = new();
+  [DataMember(Name="requestResponses")] public List<RequestResponsePair>? RequestResponses { get; set; }
   [Required, DataMember]
   public string? Description { get; set; }
   [DataMember(Name = "version")]

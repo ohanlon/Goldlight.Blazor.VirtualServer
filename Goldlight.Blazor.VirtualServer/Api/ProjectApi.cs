@@ -20,4 +20,7 @@ public class ProjectApi
 
   public async Task<Project?> SaveProject(Project project) =>
     await httpClient.Post<Project>("api/project", project);
+
+  public async Task<Project?> UpdateProject(Project project) =>
+    await httpClient.Put("/api/project", project);
 }

@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
-using Goldlight.Blazor.VirtualServer.Models;
+using Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 
-namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs;
+namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser;
 
 public class HttpHeaderParser
 {

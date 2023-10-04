@@ -27,14 +27,15 @@
         </TemplateColumn>
       </Columns>
       <ChildRowContent>
-        <DataContainer HasData="context.Item.RequestResponses.Any()">
+        <DataContainer HasData="context.Item.RequestResponses is not null && context.Item.RequestResponses.Any()">
           <DataTemplate>
             @foreach (RequestResponsePair rrpair in context.Item.RequestResponses)
             {
-              <MudCard>
-                <MudText Typo="Typo.h3">@rrpair.Name</MudText>
+              <MudCard Class="px-2">
+                <MudText Typo="Typo.h4">@rrpair.Name</MudText>
                 <MudText Typo="Typo.body1">@rrpair.Description</MudText>
                 <MudText Typo="Typo.body2">@rrpair.Request.Summary.Method</MudText>
+                <MudButton OnClick="@(() => Delete(context.Item, rrpair))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Info">Delete</MudButton>
               </MudCard>
             }
           </DataTemplate>
@@ -62,5 +63,11 @@
   {
     ProjectState.SelectedProject = project;
     NavigationManager.NavigateTo("/rrpair/upload/");
+  }
+
+  private async Task Delete(Project project, RequestResponsePair rrpair)
+  {
+    project.RequestResponses!.Remove(rrpair);
+    await ProjectApi.UpdateProject(project);
   }
 }

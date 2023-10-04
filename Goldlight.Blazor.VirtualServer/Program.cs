@@ -1,5 +1,5 @@
 using Goldlight.Blazor.VirtualServer;
-using Goldlight.Blazor.VirtualServer.Api;using Goldlight.Blazor.VirtualServer.Models;
+using Goldlight.Blazor.VirtualServer.Api;
 using Goldlight.Blazor.VirtualServer.State;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;

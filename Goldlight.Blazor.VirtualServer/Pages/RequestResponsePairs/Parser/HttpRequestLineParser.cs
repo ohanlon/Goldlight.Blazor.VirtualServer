@@ -1,7 +1,7 @@
 ﻿using System.Text.RegularExpressions;
-using Goldlight.Blazor.VirtualServer.Models;
+using Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 
-namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs;
+namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser;
 
 public class HttpRequestLineParser
 {
@@ -21,16 +21,16 @@ public class HttpRequestLineParser
 
 public class HttpResponseLineParser
 {
-  public HttpResponseSummary Parse(string responseLine)
-  {
-    HttpResponseSummary response = new();
-    Match match = Regex.Match(responseLine.Trim(), @"(?<version>HTTP/\d+\.\d+)\s+(?<status>[\d]+)");
-    if (match.Success)
+    public HttpResponseSummary Parse(string responseLine)
     {
-      response.Version = match.Groups["version"].Value;
-      response.Status = match.Groups["status"].Value;
-    }
+        HttpResponseSummary response = new();
+        Match match = Regex.Match(responseLine.Trim(), @"(?<version>HTTP/\d+\.\d+)\s+(?<status>[\d]+)");
+        if (match.Success)
+        {
+            response.Version = match.Groups["version"].Value;
+            response.Status = match.Groups["status"].Value;
+        }
 
-    return response;
-  }
+        return response;
+    }
 }
