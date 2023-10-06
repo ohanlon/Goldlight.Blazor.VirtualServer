@@ -3,6 +3,7 @@
 @inject ProjectApi ProjectApi
 @inject ProjectState ProjectState
 @inject NavigationManager NavigationManager
+@inject IDialogService DialogService
 
 <PageTitle>Projects</PageTitle>
 
@@ -29,30 +30,55 @@
       <ChildRowContent>
         <DataContainer HasData="context.Item.RequestResponses is not null && context.Item.RequestResponses.Any()">
           <DataTemplate>
-            @foreach (RequestResponsePair rrpair in context.Item.RequestResponses)
+            @foreach (RequestResponsePair rrpair in context.Item.RequestResponses!)
             {
-              <MudCard Class="px-2">
-                <MudText Typo="Typo.h4">@rrpair.Name</MudText>
-                <MudText Typo="Typo.body1">@rrpair.Description</MudText>
-                <MudText Typo="Typo.body2">@rrpair.Request.Summary.Method</MudText>
-                <MudButton OnClick="@(() => Delete(context.Item, rrpair))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Delete" Color="Color.Info">Delete</MudButton>
+              <MudCard Class="px-2 py-2 pl-2 pr-2">
+                <MudCardHeader>
+                  <CardHeaderAvatar>
+                    <MudChip Color="@GetColor(rrpair.Request.Summary.Method)">@rrpair.Request.Summary.Method</MudChip>
+                  </CardHeaderAvatar>
+                  <CardHeaderContent>
+                    <MudBadge Content="@rrpair.Response.Summary.Status" Color="Color.Primary" Overlap="false">
+                      <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
+                      <MudText Typo="Typo.subtitle2">@rrpair.Request.Summary.Path</MudText>
+                    </MudBadge>
+                  </CardHeaderContent>
+                  <CardHeaderActions>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))" />
+                  </CardHeaderActions>
+                </MudCardHeader>
+                <MudText Typo="Typo.body2">@rrpair.Description</MudText>
               </MudCard>
             }
           </DataTemplate>
         </DataContainer>
-        <MudButton OnClick="@((e) => NavigateToUpload(context.Item))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add RRPair</MudButton>
+        <MudButton OnClick="@(() => NavigateToUpload(context.Item))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add RRPair</MudButton>
       </ChildRowContent>
     </MudDataGrid>
   </DataTemplate>
 </DataContainer>
 <MudButton Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add project</MudButton>
 
+
 @code {
 
   private string? searchString;
   private Func<Project, bool> QuickFilterFunc => row => string.IsNullOrWhiteSpace(searchString) || row.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) || row.FriendlyName.Contains(searchString, StringComparison.OrdinalIgnoreCase);
-
   private List<Project>? projects;
+
+  static Color GetColor(string methodName) => 
+    methodName switch
+    {
+      "GET" => Color.Success,
+      "POST" => Color.Primary,
+      "PUT" => Color.Info,
+      "PATCH" => Color.Dark,
+      "DELETE" => Color.Error,
+      "OPTIONS" => Color.Warning,
+      _ => Color.Dark
+    };
+
   protected override async Task OnInitializedAsync()
   {
     ProjectState.SelectedProject = null;
@@ -67,7 +93,12 @@
 
   private async Task Delete(Project project, RequestResponsePair rrpair)
   {
-    project.RequestResponses!.Remove(rrpair);
-    await ProjectApi.UpdateProject(project);
+    bool? result = await DialogService.ShowMessageBox("Warning",
+      "Deleting cannot be undone. The endpoint will no longer be available", yesText: "Delete", cancelText: "Cancel");
+    if (result.HasValue && result.Value)
+    {
+      project.RequestResponses!.Remove(rrpair);
+      await ProjectApi.UpdateProject(project);
+    }
   }
 }

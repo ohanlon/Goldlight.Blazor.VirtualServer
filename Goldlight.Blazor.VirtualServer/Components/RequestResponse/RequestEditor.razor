@@ -82,13 +82,11 @@
   {
     if (ProjectState.SelectedProject is null)
     {
+      
       NavigationManager.NavigateTo("/");
     }
     project = ProjectState.SelectedProject!;
-    if (project.RequestResponses is null)
-    {
-      project.RequestResponses = new();
-    }
+    project.RequestResponses ??= new List<RequestResponsePair>();
     project.RequestResponses.Add(requestResponse);
     return Task.CompletedTask;
   }
@@ -99,7 +97,7 @@
     await form.Validate();
     if (form.IsValid)
     {
-      await ProjectApi.UpdateProject(project);
+      await ProjectApi.UpdateProject(project!);
       NavigationManager.NavigateTo("/");
     }
     submitted = false;
