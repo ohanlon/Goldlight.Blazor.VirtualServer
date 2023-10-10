@@ -13,6 +13,10 @@ public class HttpRequestLineParser
         {
             request.Method = match.Groups["method"].Value;
             request.Path = match.Groups["path"].Value;
+            if (!request.Path.StartsWith("/"))
+            {
+              request.Path = "/" + request.Path;
+            }
             request.Version = match.Groups["version"].Value;
         }
         return request;
