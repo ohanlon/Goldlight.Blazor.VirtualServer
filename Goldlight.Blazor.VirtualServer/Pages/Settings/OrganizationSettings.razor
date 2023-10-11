@@ -1,5 +1,4 @@
 ﻿@page "/settings/organization"
-@using Goldlight.Blazor.VirtualServer.Api
 
 @inject OrganizationApi OrganizationApi
 
@@ -10,11 +9,11 @@
     <MudText>No organization details present</MudText>
   </NoData>
   <DataTemplate>
-    <MudText Typo="Typo.h2">Organization details</MudText>
-    <MudText Typo="Typo.h3">Name:</MudText>
+    <MudText Typo="Typo.h3">Organization details</MudText>
+    <MudText Typo="Typo.subtitle1">Name:</MudText>
     <MudText>@organization!.Name</MudText>
-    <MudText Typo="Typo.h2">API</MudText>
-    <MudText Typo="Typo.h3">API Key:</MudText>
+    <MudText Typo="Typo.h3">API</MudText>
+    <MudText Typo="Typo.subtitle1">API Key:</MudText>
     <MudText>@organization!.ApiKey</MudText>
   </DataTemplate>
 </DataContainer>
