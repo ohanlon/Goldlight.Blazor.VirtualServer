@@ -43,6 +43,8 @@
         var response = responseHandler.Parse(await ReadFileAsync(file));
         await OnResponseUploaded.InvokeAsync(response);
         break;
+      default:
+        throw new ArgumentOutOfRangeException();
     }
   }
 

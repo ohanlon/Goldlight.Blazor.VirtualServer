@@ -8,7 +8,7 @@ internal class HttpRequestLineParser
     public HttpRequestSummary Parse(string requestLine)
     {
         HttpRequestSummary request = new();
-        Match match = Regex.Match(requestLine.Trim(), @"(?<method>[\w]+)\s+(?<path>[\w\/]+)(\s+)?(?<version>HTTP/\d+\.\d+)?");
+        Match match = Regex.Match(requestLine.Trim(), @"(?<method>[\w]+)\s+(?<path>[\w\/%$-_.+!*'(),]+)(\s+)?(?<version>HTTP/\d+\.\d+)?");
         if (match.Success)
         {
             request.Method = match.Groups["method"].Value;

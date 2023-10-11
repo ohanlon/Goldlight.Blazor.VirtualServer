@@ -1,7 +1,7 @@
 ﻿namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser;
 
-public abstract class RequestResponseParser<T, K> where T : class, new()
-  where K : LineContent<T>, new()
+public abstract class RequestResponseParser<T, TK> where T : class, new()
+  where TK : LineContent<T>, new()
 {
   public T Parse(string file)
   {
@@ -10,7 +10,7 @@ public abstract class RequestResponseParser<T, K> where T : class, new()
     bool headerParsed = false;
     HttpHeaderParser headerParser = new();
 
-    K lineContent = new K();
+    TK lineContent = new();
     while (lines.Length > 0)
     {
       string line = lines[0];

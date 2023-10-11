@@ -98,7 +98,8 @@
     if (result.HasValue && result.Value)
     {
       project.RequestResponses!.Remove(rrpair);
-      await ProjectApi.UpdateProject(project);
+      var updatedProject = await ProjectApi.UpdateProject(project);
+      project.Version = updatedProject!.Version;
     }
   }
 }
