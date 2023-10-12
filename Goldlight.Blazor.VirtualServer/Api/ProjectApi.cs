@@ -1,5 +1,6 @@
 ﻿using Goldlight.Blazor.VirtualServer.Extensions;
 using Goldlight.Blazor.VirtualServer.Models;
+using System.Collections.ObjectModel;
 
 namespace Goldlight.Blazor.VirtualServer.Api;
 
@@ -12,15 +13,18 @@ public class ProjectApi
     this.httpClient = httpClient;
   }
 
-  public async Task<List<Project>?> GetProjects(string organization) => 
-    await httpClient.Get<List<Project>>($"api/{organization}/projects");
+  public async Task<ObservableCollection<Project>?> GetProjects(string organization) => 
+    await httpClient.Get<ObservableCollection<Project>>($"api/{organization}/projects");
 
   public async Task<Project?> GetProject(string id) =>
     await httpClient.Get<Project>($"api/project/{id}");
 
   public async Task<Project?> SaveProject(Project project) =>
-    await httpClient.Post<Project>("api/project", project);
+    await httpClient.Post("api/project", project);
 
   public async Task<Project?> UpdateProject(Project project) =>
     await httpClient.Put("/api/project", project);
+
+  public async Task DeleteProject(string id) =>
+    await httpClient.Delete<string>($"api/project/{id}");
 }

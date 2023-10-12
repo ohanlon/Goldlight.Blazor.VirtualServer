@@ -15,6 +15,9 @@ public static class HttpClientExtensions
   public static async Task<T?> Put<T>(this HttpClient client, string uri, T requestBody) =>
     await GetResponseFromServer<T>(client, GetRequestMessage(HttpMethod.Put, uri, requestBody));
 
+  public static async Task Delete<T>(this HttpClient client, string uri) =>
+    await GetResponseFromServer<T>(client, GetRequestMessage(HttpMethod.Delete, uri));
+
   private static async Task<T?> GetResponseFromServer<T>(HttpClient client, HttpRequestMessage requestMessage)
   {
     HttpResponseMessage response = await client.SendAsync(requestMessage);

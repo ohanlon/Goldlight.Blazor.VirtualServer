@@ -3,4 +3,11 @@
 @using Goldlight.Blazor.VirtualServer.Components.RequestResponse
 <PageTitle>Response/Response</PageTitle>
 
-<RequestEditor EditMode="false" />
+<RequestEditor EditMode="@Edit" />
+
+@code
+{
+  [Parameter]
+  [SupplyParameterFromQuery]
+  public bool Edit { get; set; }
+}

@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using Goldlight.Blazor.VirtualServer.Extensions
+@using System.Collections.ObjectModel
 
 @inject ProjectApi ProjectApi
 @inject ProjectState ProjectState
@@ -23,7 +25,14 @@
         <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name"/>
         <TemplateColumn Title="Base URL">
           <CellTemplate>
-            <UrlFriendlyProject Project="context.Item"></UrlFriendlyProject>
+            <UrlFriendlyProject Project="context.Item" />
+          </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn CellClass="d-flex justify-end">
+          <CellTemplate>
+            <MudTooltip Text="Delete this project">
+              <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item))"/>
+            </MudTooltip>
           </CellTemplate>
         </TemplateColumn>
       </Columns>
@@ -44,8 +53,15 @@
                     </MudBadge>
                   </CardHeaderContent>
                   <CardHeaderActions>
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))" />
+                    <MudTooltip Text="Clone this request/response">
+                      <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.CopyAll" Color="Color.Default" OnClick="@(() => Clone(context.Item, rrpair))"/>
+                    </MudTooltip>
+                    <MudTooltip Text="Delete this request/response">
+                      <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))"/>
+                    </MudTooltip>
+                    <MudTooltip Text="Edit this request/response">
+                      <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="@(() => NavigateToUpload(context.Item, true, rrpair))"/>
+                    </MudTooltip>
                   </CardHeaderActions>
                 </MudCardHeader>
                 <MudText Typo="Typo.body2">@rrpair.Description</MudText>
@@ -53,19 +69,20 @@
             }
           </DataTemplate>
         </DataContainer>
-        <MudButton OnClick="@(() => NavigateToUpload(context.Item))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add RRPair</MudButton>
+        <MudButton Disabled="submitting" OnClick="@(() => NavigateToUpload(context.Item, false))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add RRPair</MudButton>
       </ChildRowContent>
     </MudDataGrid>
   </DataTemplate>
 </DataContainer>
-<MudButton Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add project</MudButton>
+<MudButton Disabled="submitting" Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add project</MudButton>
 
 
 @code {
 
   private string? searchString;
   private Func<Project, bool> QuickFilterFunc => row => string.IsNullOrWhiteSpace(searchString) || row.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) || row.FriendlyName.Contains(searchString, StringComparison.OrdinalIgnoreCase);
-  private List<Project>? projects;
+  private ObservableCollection<Project>? projects;
+  private bool submitting;
 
   static Color GetColor(string methodName) => 
     methodName switch
@@ -85,14 +102,39 @@
     projects = await ProjectApi.GetProjects("goldlight");
   }
 
-  private void NavigateToUpload(Project project)
+  private void NavigateToUpload(Project project, bool edit, RequestResponsePair? requestResponsePair = null)
   {
     ProjectState.SelectedProject = project;
-    NavigationManager.NavigateTo("/rrpair/upload/");
+    ProjectState.SelectedRequestResponse = requestResponsePair;
+    NavigationManager.NavigateTo($"/rrpair/upload?Edit={edit}");
+  }
+
+  private async Task Clone(Project project, RequestResponsePair rrpair)
+  {
+    submitting = true;
+    var rrpairClone = rrpair.Clone();
+    project.RequestResponses!.Add(rrpairClone);
+    var updatedProject = await ProjectApi.UpdateProject(project);
+    project.Version = updatedProject!.Version;
+    NavigateToUpload(project, true, rrpairClone);
+  }
+
+  private async Task Delete(Project project)
+  {
+    submitting = true;
+    bool? result = await DialogService.ShowMessageBox("Warning",
+      "Deleting a project cannot be undone. Any endpoints will no longer be available.", yesText: "Delete", cancelText: "Cancel");
+    if (result.HasValue && result.Value)
+    {
+      projects.Remove(project);
+      await ProjectApi.DeleteProject(project.Id.ToString());
+    }
+    submitting = false;
   }
 
   private async Task Delete(Project project, RequestResponsePair rrpair)
   {
+    submitting = true;
     bool? result = await DialogService.ShowMessageBox("Warning",
       "Deleting cannot be undone. The endpoint will no longer be available", yesText: "Delete", cancelText: "Cancel");
     if (result.HasValue && result.Value)
@@ -101,5 +143,6 @@
       var updatedProject = await ProjectApi.UpdateProject(project);
       project.Version = updatedProject!.Version;
     }
+    submitting = false;
   }
 }

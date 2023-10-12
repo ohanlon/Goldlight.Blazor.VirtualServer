@@ -33,7 +33,9 @@
               <PropertyColumn Property="hdr => hdr.Value"/>
               <TemplateColumn CellClass="d-flex justify-end">
                 <EditTemplate>
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" OnClick="@(() => DeleteHeader(RequestResponse.Request.Headers, context.Item))"/>
+                  <MudTooltip Text="Delete this header">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete"OnClick="@(() => DeleteHeader(RequestResponse.Request.Headers, context.Item))"/>
+                  </MudTooltip>
                 </EditTemplate>
               </TemplateColumn>
             </Columns>
@@ -59,7 +61,9 @@
               <PropertyColumn Property="hdr => hdr.Value"/>
               <TemplateColumn CellClass="d-flex justify-end">
                 <EditTemplate>
-                  <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Primary" OnClick="@(() => DeleteHeader(RequestResponse.Response.Headers, context.Item))"/>
+                  <MudTooltip Text="Delete this header">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteHeader(RequestResponse.Response.Headers, context.Item))"/>
+                  </MudTooltip>
                 </EditTemplate>
               </TemplateColumn>
             </Columns>
@@ -74,7 +78,7 @@
 
 @code {
   [Parameter] public bool EditMode { get; set; }
-  public RequestResponsePair RequestResponse = new();
+  public RequestResponsePair RequestResponse { get; set; } = new();
   private bool requestHeaderExpanded = true;
   private bool responseHeaderExpanded = true;
   Project? project;
@@ -101,7 +105,14 @@
     }
     project = ProjectState.SelectedProject!;
     project.RequestResponses ??= new List<RequestResponsePair>();
-    project.RequestResponses.Add(RequestResponse);
+    if (!EditMode)
+    {
+      project.RequestResponses.Add(RequestResponse);
+    }
+    else
+    {
+      RequestResponse = ProjectState.SelectedRequestResponse!;
+    }
     return Task.CompletedTask;
   }
 
@@ -123,6 +134,8 @@
     if (form.IsValid)
     {
       await ProjectApi.UpdateProject(project!);
+      ProjectState.SelectedProject = null;
+      ProjectState.SelectedRequestResponse = null;
       NavigationManager.NavigateTo("/");
     }
     submitted = false;
