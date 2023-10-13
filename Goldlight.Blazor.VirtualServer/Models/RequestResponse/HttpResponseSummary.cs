@@ -7,5 +7,5 @@ namespace Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 public class HttpResponseSummary
 {
   [DataMember(Name="version"), Required] public string? Version { get; set; }
-  [DataMember(Name = "status"), Required] public string? Status { get; set; }
+  [DataMember(Name = "status"), Required] public int? Status { get; set; }
 }

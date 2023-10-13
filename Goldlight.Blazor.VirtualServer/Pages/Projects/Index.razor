@@ -47,10 +47,10 @@
                     <MudChip Color="@GetColor(rrpair.Request.Summary.Method)">@rrpair.Request.Summary.Method</MudChip>
                   </CardHeaderAvatar>
                   <CardHeaderContent>
-                    <MudBadge Content="@rrpair.Response.Summary.Status" Color="Color.Primary" Overlap="false">
+                    <MudBadge Content="@rrpair.Response.Summary.Status" Color="Color.Primary" Overlap="false" Origin="Origin.TopLeft" Class="ml-2 ml-3">
                       <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
-                      <MudText Typo="Typo.subtitle2">@rrpair.Request.Summary.Path</MudText>
                     </MudBadge>
+                    <MudText Typo="Typo.subtitle2" Class="ml-2 pr-2">@rrpair.Request.Summary.Path</MudText>
                   </CardHeaderContent>
                   <CardHeaderActions>
                     <MudTooltip Text="Clone this request/response">

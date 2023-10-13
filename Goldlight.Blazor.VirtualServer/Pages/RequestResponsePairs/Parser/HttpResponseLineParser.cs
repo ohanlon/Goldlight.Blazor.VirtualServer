@@ -11,8 +11,9 @@ internal class HttpResponseLineParser
     Match match = Regex.Match(responseLine.Trim(), @"(?<version>HTTP/\d+\.\d+)\s+(?<status>[\d]+)");
     if (match.Success)
     {
+      int.TryParse(match.Groups["status"].Value, out int status);
       response.Version = match.Groups["version"].Value;
-      response.Status = match.Groups["status"].Value;
+      response.Status = status;
     }
 
     return response;

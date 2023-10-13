@@ -23,7 +23,8 @@
           <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
         }
       </MudSelect>
-      <MudTextField Label="Path" @bind-Value="RequestResponse.Request.Summary.Path" For="@(() => RequestResponse.Request.Summary.Path)"/>
+      <MudTextField Label="Version" @bind-Value="RequestResponse.Request.Summary.Version" For="@(() => RequestResponse.Request.Summary.Version)" />
+      <MudNumericField Label="Path" @bind-Value="RequestResponse.Request.Summary.Path" For="@(() => RequestResponse.Request.Summary.Path)" />
       <MudExpansionPanels Dense Class="mt-0" Elevation="0">
         <MudExpansionPanel Dense Class="mt-0 pl=0" Text="Headers" @bind-IsExpanded="requestHeaderExpanded">
           <MudButton OnClick="@(() => AddHeader(RequestResponse.Request.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
@@ -51,7 +52,7 @@
         </DataTemplate>
       </DataContainer>
       <MudTextField Label="Version" Immediate @bind-Value="RequestResponse.Response.Summary.Version" For="@(() => RequestResponse.Response.Summary.Version)"/>
-      <MudTextField Label="Status" Immediate @bind-Value="RequestResponse.Response.Summary.Status" For="@(() => RequestResponse.Response.Summary.Status)"/>
+       <MudNumericField Label="Status" Immediate @bind-Value="RequestResponse.Response.Summary.Status" For="@(() => RequestResponse.Response.Summary.Status)" />
       <MudExpansionPanels Dense Class="mt-0" Elevation="0">
         <MudExpansionPanel Dense Class="mt-0 pl=0" DisableGutters Text="Headers" @bind-IsExpanded="responseHeaderExpanded">
           <MudButton OnClick="@(() => AddHeader(RequestResponse.Response.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
