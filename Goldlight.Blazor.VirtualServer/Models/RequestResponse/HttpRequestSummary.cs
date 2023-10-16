@@ -8,7 +8,6 @@ public class HttpRequestSummary
 {
   [Required, DataMember(Name = "method")]
   public string Method { get; set; } = "ANY";
-
   [Required, DataMember(Name = "path")] public string? Path { get; set; }
-  [DataMember(Name = "version")] public string? Version { get; set; }
+  [DataMember(Name = "protocol")] public string? Protocol { get; set; }
 }

@@ -1,7 +1,7 @@
 ﻿@using Goldlight.Blazor.VirtualServer.Components.RequestResponse.Validator
 @using System.Collections.ObjectModel
 @using System.ComponentModel.Design.Serialization
-@inject ProjectState ProjectState
+@inject ProjectProps ProjectProps
 @inject NavigationManager NavigationManager
 @inject ProjectApi ProjectApi
 
@@ -12,7 +12,7 @@
       <MudTextField Label="Description" Immediate Lines="3" @bind-Value="RequestResponse.Description" For="@(() => RequestResponse.Description)"/>
     </MudItem>
     <MudItem xs="6">
-      <DataContainer HasData="!EditMode">
+      <DataContainer HasData="!EditProject">
         <DataTemplate>
           <UploadRequestResponse FileTypes=".json, .request" OnRequestUploaded="OnRequestUploadedAsync" Upload="UploadRequestResponse.UploadType.Request"/>
         </DataTemplate>
@@ -23,7 +23,7 @@
           <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
         }
       </MudSelect>
-      <MudTextField Label="Version" @bind-Value="RequestResponse.Request.Summary.Version" For="@(() => RequestResponse.Request.Summary.Version)" />
+      <MudTextField Label="Protocol" @bind-Value="RequestResponse.Request.Summary.Protocol" For="@(() => RequestResponse.Request.Summary.Protocol)" />
       <MudNumericField Label="Path" @bind-Value="RequestResponse.Request.Summary.Path" For="@(() => RequestResponse.Request.Summary.Path)" />
       <MudExpansionPanels Dense Class="mt-0" Elevation="0">
         <MudExpansionPanel Dense Class="mt-0 pl=0" Text="Headers" @bind-IsExpanded="requestHeaderExpanded">
@@ -46,12 +46,12 @@
       <MudTextField Label="Content" Immediate @bind-Value="RequestResponse.Request.Content" For="@(() => RequestResponse.Request.Content)" Lines="20"/>
     </MudItem>
     <MudItem xs="6">
-      <DataContainer HasData="!EditMode">
+      <DataContainer HasData="!EditProject">
         <DataTemplate>
           <UploadRequestResponse FileTypes=".json, .response" ButtonText="Upload Response" OnResponseUploaded="OnResponseUploadedAsync" Upload="UploadRequestResponse.UploadType.Response"/>
         </DataTemplate>
       </DataContainer>
-      <MudTextField Label="Version" Immediate @bind-Value="RequestResponse.Response.Summary.Version" For="@(() => RequestResponse.Response.Summary.Version)"/>
+      <MudTextField Label="Protocol" Immediate @bind-Value="RequestResponse.Response.Summary.Protocol" For="@(() => RequestResponse.Response.Summary.Protocol)"/>
        <MudNumericField Label="Status" Immediate @bind-Value="RequestResponse.Response.Summary.Status" For="@(() => RequestResponse.Response.Summary.Status)" />
       <MudExpansionPanels Dense Class="mt-0" Elevation="0">
         <MudExpansionPanel Dense Class="mt-0 pl=0" DisableGutters Text="Headers" @bind-IsExpanded="responseHeaderExpanded">
@@ -77,82 +77,82 @@
   <MudButton Disabled="submitted" OnClick="(async () => await OnSubmitAsync())" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">Save</MudButton>
 </MudForm>
 
-@code {
-  [Parameter] public bool EditMode { get; set; }
-  public RequestResponsePair RequestResponse { get; set; } = new();
-  private bool requestHeaderExpanded = true;
-  private bool responseHeaderExpanded = true;
-  Project? project;
-  bool submitted;
-  MudForm form = null!;
-  RequestResponsePairValidator validator = new();
-  private readonly string[] httpMethods =
-  {
-    "POST",
-    "GET",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-    "ANY"
-  };
+ @code {
 
-  protected override Task OnInitializedAsync()
-  {
-    if (ProjectState.SelectedProject is null)
-    {
-      
-      NavigationManager.NavigateTo("/");
-    }
-    project = ProjectState.SelectedProject!;
-    project.RequestResponses ??= new List<RequestResponsePair>();
-    if (!EditMode)
-    {
-      project.RequestResponses.Add(RequestResponse);
-    }
-    else
-    {
-      RequestResponse = ProjectState.SelectedRequestResponse!;
-    }
-    return Task.CompletedTask;
-  }
+   [Parameter]
+   public bool EditProject { get; set; }
 
-  private void DeleteHeader(ObservableCollection<HttpHeader> headers, HttpHeader header)
-  {
-    headers.Remove(header);
-  }
+   public RequestResponsePair RequestResponse { get; set; } = new();
+   private bool requestHeaderExpanded = true;
+   private bool responseHeaderExpanded = true;
+   private Project? project;
+   private bool submitted;
+   private MudForm form = null!;
+   private RequestResponsePairValidator validator = new();
 
-  private void AddHeader(ObservableCollection<HttpHeader> headers)
-  {
-    headers.Add(new HttpHeader());
-    StateHasChanged();
-  }
+   private readonly string[] httpMethods =
+   {
+     "POST",
+     "GET",
+     "PUT",
+     "PATCH",
+     "DELETE",
+     "OPTIONS",
+     "ANY"
+   };
 
-  private async Task OnSubmitAsync()
-  {
-    submitted = true;
-    await form.Validate();
-    if (form.IsValid)
-    {
-      await ProjectApi.UpdateProject(project!);
-      ProjectState.SelectedProject = null;
-      ProjectState.SelectedRequestResponse = null;
-      NavigationManager.NavigateTo("/");
-    }
-    submitted = false;
-  }
+   protected override void OnInitialized()
+   {
+     if (ProjectProps.SelectedProject is null)
+     {
+       NavigationManager.NavigateTo("/");
+     }
+     project = ProjectProps.SelectedProject!;
+     project.RequestResponses ??= new List<RequestResponsePair>();
+     if (!EditProject)
+     {
+       project.RequestResponses.Add(RequestResponse);
+     }
+     else
+     {
+       RequestResponse = ProjectProps.SelectedRequestResponse!;
+     }
+   }
 
-  private async Task OnResponseUploadedAsync(Response response)
-  {
-    RequestResponse.Response = response;
-    StateHasChanged();
-    await form.Validate();
-  }
+   private void DeleteHeader(ObservableCollection<HttpHeader> headers, HttpHeader header)
+   {
+     headers.Remove(header);
+   }
 
-  private async Task OnRequestUploadedAsync(Request request)
-  {
-    RequestResponse.Request = request;
-    StateHasChanged();
-    await form.Validate();
-  }
+   private void AddHeader(ObservableCollection<HttpHeader> headers)
+   {
+     headers.Add(new HttpHeader());
+   }
+
+   private async Task OnSubmitAsync()
+   {
+     submitted = true;
+     await form.Validate();
+     if (form.IsValid)
+     {
+       await ProjectApi.UpdateProject(project!);
+       ProjectProps.Clear();
+       NavigationManager.NavigateTo("/");
+     }
+     submitted = false;
+   }
+
+   private async Task OnResponseUploadedAsync(Response response)
+   {
+     RequestResponse.Response = response;
+     StateHasChanged();
+     await form.Validate();
+   }
+
+   private async Task OnRequestUploadedAsync(Request request)
+   {
+     RequestResponse.Request = request;
+     StateHasChanged();
+     await form.Validate();
+   }
 }

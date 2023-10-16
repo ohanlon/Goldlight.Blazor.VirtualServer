@@ -8,7 +8,7 @@ public class RequestSummaryContent : LineContent<Request>
 
   public override void FillSummary(Request request, string line)
   {
-    request.Summary = new HttpRequestLineParser().Parse(line);
+    request.Summary = HttpRequestLineParser.Parse(line);
   }
 
   public override void SetContent(Request request, string lines) => request.Content = lines;

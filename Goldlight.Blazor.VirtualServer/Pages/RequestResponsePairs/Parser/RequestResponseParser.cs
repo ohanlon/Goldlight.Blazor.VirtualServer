@@ -30,9 +30,17 @@ public abstract class RequestResponseParser<T, TK> where T : class, new()
         lineContent.AddHeader(response, headerParser, line);
         continue;
       }
+
+      // We want to ignore any blank lines that have inadvertently been added to the file, making sure we
+      // have no content that shouldn't belong.
+      if (string.IsNullOrWhiteSpace(line))
+      {
+        continue;
+      }
       lineContent.SetContent(response, line + string.Concat(lines));
       break;
     }
     return response;
   }
+
 }

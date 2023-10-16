@@ -32,7 +32,7 @@ public static class ModelExtensions
         {
           Method = pair.Request.Summary.Method,
           Path = pair.Request.Summary.Path,
-          Version = pair.Request.Summary.Version
+          Protocol = pair.Request.Summary.Protocol
         }
       },
       Response = new Response()
@@ -42,7 +42,7 @@ public static class ModelExtensions
         Summary = new HttpResponseSummary
         {
           Status = pair.Response.Summary.Status,
-          Version = pair.Response.Summary.Version
+          Protocol = pair.Response.Summary.Protocol
         }
       }
     };

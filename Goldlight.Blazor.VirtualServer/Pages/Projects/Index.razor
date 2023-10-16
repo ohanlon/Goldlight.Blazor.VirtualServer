@@ -3,7 +3,7 @@
 @using System.Collections.ObjectModel
 
 @inject ProjectApi ProjectApi
-@inject ProjectState ProjectState
+@inject ProjectProps ProjectProps
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 
@@ -25,7 +25,7 @@
         <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name"/>
         <TemplateColumn Title="Base URL">
           <CellTemplate>
-            <UrlFriendlyProject Project="context.Item" />
+            <MudText>http://localhost:5601/@context.Item.FriendlyName/@context.Item.UrlName</MudText>
           </CellTemplate>
         </TemplateColumn>
         <TemplateColumn CellClass="d-flex justify-end">
@@ -45,11 +45,10 @@
                 <MudCardHeader>
                   <CardHeaderAvatar>
                     <MudChip Color="@GetColor(rrpair.Request.Summary.Method)">@rrpair.Request.Summary.Method</MudChip>
+                    <MudChip Color="Color.Primary">@rrpair.Response.Summary.Status.ToString()</MudChip>
                   </CardHeaderAvatar>
                   <CardHeaderContent>
-                    <MudBadge Content="@rrpair.Response.Summary.Status" Color="Color.Primary" Overlap="false" Origin="Origin.TopLeft" Class="ml-2 ml-3">
-                      <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
-                    </MudBadge>
+                    <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
                     <MudText Typo="Typo.subtitle2" Class="ml-2 pr-2">@rrpair.Request.Summary.Path</MudText>
                   </CardHeaderContent>
                   <CardHeaderActions>
@@ -69,7 +68,7 @@
             }
           </DataTemplate>
         </DataContainer>
-        <MudButton Disabled="submitting" OnClick="@(() => NavigateToUpload(context.Item, false))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add RRPair</MudButton>
+        <MudButton Disabled="submitting" OnClick="@(() => NavigateToUpload(context.Item, false))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Request/Response</MudButton>
       </ChildRowContent>
     </MudDataGrid>
   </DataTemplate>
@@ -80,7 +79,7 @@
 @code {
 
   private string? searchString;
-  private Func<Project, bool> QuickFilterFunc => row => string.IsNullOrWhiteSpace(searchString) || row.Name.Contains(searchString, StringComparison.OrdinalIgnoreCase) || row.FriendlyName.Contains(searchString, StringComparison.OrdinalIgnoreCase);
+  private Func<Project, bool> QuickFilterFunc => row => string.IsNullOrWhiteSpace(searchString) || row.Name!.Contains(searchString, StringComparison.OrdinalIgnoreCase) || row.FriendlyName!.Contains(searchString, StringComparison.OrdinalIgnoreCase);
   private ObservableCollection<Project>? projects;
   private bool submitting;
 
@@ -98,14 +97,13 @@
 
   protected override async Task OnInitializedAsync()
   {
-    ProjectState.SelectedProject = null;
+    ProjectProps.Clear();
     projects = await ProjectApi.GetProjects("goldlight");
   }
 
   private void NavigateToUpload(Project project, bool edit, RequestResponsePair? requestResponsePair = null)
   {
-    ProjectState.SelectedProject = project;
-    ProjectState.SelectedRequestResponse = requestResponsePair;
+    ProjectProps.Set(project, requestResponsePair);
     NavigationManager.NavigateTo($"/rrpair/upload?Edit={edit}");
   }
 

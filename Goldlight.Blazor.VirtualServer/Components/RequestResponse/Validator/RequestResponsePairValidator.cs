@@ -13,7 +13,7 @@ public class RequestResponsePairValidator : AbstractValidator<RequestResponsePai
     RuleFor(rr => rr.Description).NotEmpty().WithMessage("The description needs a minimum of 10 characters.")
       .MinimumLength(10).WithMessage("The description needs a minimum of 10 characters.");
     RuleFor(rr => rr.Response.Summary.Status).NotEmpty();
-    RuleFor(rr => rr.Response.Summary.Version).NotEmpty();
+    RuleFor(rr => rr.Response.Summary.Protocol).NotEmpty();
     RuleFor(rr => rr.Request.Summary.Method).NotEmpty();
     RuleFor(rr => rr.Request.Summary.Path).NotEmpty();
     RuleForEach(rr => rr.Response.Headers).SetValidator(new HeaderValidator());

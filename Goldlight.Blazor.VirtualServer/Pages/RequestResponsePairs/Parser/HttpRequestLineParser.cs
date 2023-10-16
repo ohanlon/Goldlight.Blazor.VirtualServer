@@ -5,10 +5,10 @@ namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser;
 
 internal class HttpRequestLineParser
 {
-    public HttpRequestSummary Parse(string requestLine)
+    public static HttpRequestSummary Parse(string requestLine)
     {
         HttpRequestSummary request = new();
-        Match match = Regex.Match(requestLine.Trim(), @"(?<method>[\w]+)\s+(?<path>[\w\/%$-_.+!*'(),]+)(\s+)?(?<version>HTTP/\d+\.\d+)?");
+        Match match = Regex.Match(requestLine.Trim(), @"(?<method>[\w]+)\s+(?<path>[\w\/%$-_.+!*'(),]+)(\s+)?(?<protocol>HTTP/\d+\.\d+)?");
         if (match.Success)
         {
             request.Method = match.Groups["method"].Value;
@@ -17,7 +17,7 @@ internal class HttpRequestLineParser
             {
               request.Path = "/" + request.Path;
             }
-            request.Version = match.Groups["version"].Value;
+            request.Protocol = match.Groups["protocol"].Value;
         }
         return request;
     }

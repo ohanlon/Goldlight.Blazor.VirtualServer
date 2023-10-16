@@ -1,7 +1,9 @@
 ﻿@page "/projects/addproject"
 @inject NavigationManager NavigationManager
 @inject ProjectApi ProjectApi
-<PageTitle>Add project</PageTitle>
+@inject IDialogService DialogService
+
+<PageTitle>Add Project</PageTitle>
 
 <EditForm Model="@project" OnValidSubmit="OnValidSubmit">
   <DataAnnotationsValidator/>
@@ -17,13 +19,20 @@
 </EditForm>
 
 @code {
-
-  readonly Project project = new() { Organization = "goldlight" };
+  private readonly Project project = new() { Organization = "goldlight" };
   bool submitted;
+
   private async Task OnValidSubmit(EditContext context)
   {
     submitted = true;
-    await ProjectApi.SaveProject(project);
-    NavigationManager.NavigateTo("/");
+    bool? result = await DialogService.ShowMessageBox("Warning",
+      "The friendly name cannot be changed once you have saved this record. Are you sure you want to continue saving?", yesText: "Yes", cancelText: "Cancel");
+    if (result.HasValue && result.Value)
+    {
+      await ProjectApi.SaveProject(project);
+      NavigationManager.NavigateTo("/");
+    }
+    submitted = false;
   }
+
 }
