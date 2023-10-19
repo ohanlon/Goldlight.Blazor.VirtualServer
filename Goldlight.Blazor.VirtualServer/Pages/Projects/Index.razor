@@ -6,83 +6,99 @@
 @inject ProjectProps ProjectProps
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
+@inject Clipboard Clipboard
+@inject IConfiguration Configuration
 
 <PageTitle>Projects</PageTitle>
 
-<DataContainer HasData="@(projects is not null)">
+<DataContainer HasData="showInfo">
   <DataTemplate>
-    <MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc" Style="align-items: center;">
-      <ToolBarContent>
-        <MudText Typo="Typo.h6">Projects</MudText>
-        <MudSpacer/>
-        <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                      AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
-
-      </ToolBarContent>
-      <Columns>
-        <HierarchyColumn T="Project" />
-        <PropertyColumn Property="x => x.Name" Title="Name"/>
-        <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name"/>
-        <TemplateColumn Title="Base URL">
-          <CellTemplate>
-            <MudText>http://localhost:5601/@context.Item.FriendlyName/@context.Item.UrlName</MudText>
-          </CellTemplate>
-        </TemplateColumn>
-        <TemplateColumn CellClass="d-flex justify-end">
-          <CellTemplate>
-            <MudTooltip Text="Delete this project">
-              <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item))"/>
-            </MudTooltip>
-          </CellTemplate>
-        </TemplateColumn>
-      </Columns>
-      <ChildRowContent>
-        <DataContainer HasData="context.Item.RequestResponses is not null && context.Item.RequestResponses.Any()">
-          <DataTemplate>
-            @foreach (RequestResponsePair rrpair in context.Item.RequestResponses!)
-            {
-              <MudCard Class="px-2 py-2 pl-2 pr-2">
-                <MudCardHeader>
-                  <CardHeaderAvatar>
-                    <MudChip Color="@GetColor(rrpair.Request.Summary.Method)">@rrpair.Request.Summary.Method</MudChip>
-                    <MudChip Color="Color.Primary">@rrpair.Response.Summary.Status.ToString()</MudChip>
-                  </CardHeaderAvatar>
-                  <CardHeaderContent>
-                    <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
-                    <MudText Typo="Typo.subtitle2" Class="ml-2 pr-2">@rrpair.Request.Summary.Path</MudText>
-                  </CardHeaderContent>
-                  <CardHeaderActions>
-                    <MudTooltip Text="Clone this request/response">
-                      <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.CopyAll" Color="Color.Default" OnClick="@(() => Clone(context.Item, rrpair))"/>
-                    </MudTooltip>
-                    <MudTooltip Text="Delete this request/response">
-                      <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))"/>
-                    </MudTooltip>
-                    <MudTooltip Text="Edit this request/response">
-                      <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="@(() => NavigateToUpload(context.Item, true, rrpair))"/>
-                    </MudTooltip>
-                  </CardHeaderActions>
-                </MudCardHeader>
-                <MudText Typo="Typo.body2">@rrpair.Description</MudText>
-              </MudCard>
-            }
-          </DataTemplate>
-        </DataContainer>
-        <MudButton Disabled="submitting" OnClick="@(() => NavigateToUpload(context.Item, false))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Request/Response</MudButton>
-      </ChildRowContent>
-    </MudDataGrid>
+    <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" Variant="Variant.Filled" ShowCloseIcon="true" CloseIconClicked="(()=>CloseAlert())">@infoMessage</MudAlert>
   </DataTemplate>
 </DataContainer>
-<MudButton Disabled="submitting" Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add project</MudButton>
+<Loading IsLoading="loading">
+  <Loaded>
+    <DataContainer HasData="@(projects is not null)">
+      <DataTemplate>
+        <MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc" Style="align-items: center;">
+          <ToolBarContent>
+            <MudText Typo="Typo.h6">Projects</MudText>
+            <MudSpacer/>
+            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
+
+          </ToolBarContent>
+          <Columns>
+            <HierarchyColumn T="Project"/>
+            <PropertyColumn Property="x => x.Name" Title="Name"/>
+            <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name"/>
+            <TemplateColumn Title="Base URL">
+              <CellTemplate>
+                <MudText>@baseUrl@context.Item.Organization/@context.Item.FriendlyName</MudText>
+              </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn CellClass="d-flex justify-end">
+              <CellTemplate>
+                <MudTooltip Text="Delete this project">
+                  <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item))"/>
+                </MudTooltip>
+              </CellTemplate>
+            </TemplateColumn>
+          </Columns>
+          <ChildRowContent>
+            <DataContainer HasData="context.Item.RequestResponses is not null && context.Item.RequestResponses.Any()">
+              <DataTemplate>
+                @foreach (RequestResponsePair rrpair in context.Item.RequestResponses!)
+                {
+                  <MudCard Class="px-2 py-2 pl-2 pr-2">
+                    <MudCardHeader>
+                      <CardHeaderAvatar>
+                        <MudChip Color="@GetColor(rrpair.Request.Summary.Method)">@rrpair.Request.Summary.Method</MudChip>
+                        <MudChip Color="Color.Primary">@rrpair.Response.Summary.Status.ToString()</MudChip>
+                      </CardHeaderAvatar>
+                      <CardHeaderContent>
+                        <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
+                        <MudText Typo="Typo.subtitle2" Class="ml-2 pr-2">@rrpair.Request.Summary.Path</MudText>
+                      </CardHeaderContent>
+                      <CardHeaderActions>
+                        <MudTooltip Text="Copy the URL to the clipboard.">
+                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Default" OnClick="@(() => WriteUrl(context.Item, rrpair))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Clone this request/response">
+                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.PlusOne" Color="Color.Default" OnClick="@(() => Clone(context.Item, rrpair))"/>
+                        </MudTooltip>
+                        <MudTooltip Text="Delete this request/response">
+                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))"/>
+                        </MudTooltip>
+                        <MudTooltip Text="Edit this request/response">
+                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="@(() => NavigateToUpload(context.Item, true, rrpair))"/>
+                        </MudTooltip>
+                      </CardHeaderActions>
+                    </MudCardHeader>
+                    <MudText Typo="Typo.body2">@rrpair.Description</MudText>
+                  </MudCard>
+                }
+              </DataTemplate>
+            </DataContainer>
+            <MudButton Disabled="submitting" OnClick="@(() => NavigateToUpload(context.Item, false))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Request/Response</MudButton>
+          </ChildRowContent>
+        </MudDataGrid>
+      </DataTemplate>
+    </DataContainer>
+    <MudButton Disabled="submitting" Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add project</MudButton>
+  </Loaded>
+</Loading>
 
 
 @code {
-
+  private string? baseUrl;
   private string? searchString;
   private Func<Project, bool> QuickFilterFunc => row => string.IsNullOrWhiteSpace(searchString) || row.Name!.Contains(searchString, StringComparison.OrdinalIgnoreCase) || row.FriendlyName!.Contains(searchString, StringComparison.OrdinalIgnoreCase);
   private ObservableCollection<Project>? projects;
   private bool submitting;
-
+  private bool loading = true;
+  private bool showInfo;
+  private string infoMessage = "";
   static Color GetColor(string methodName) => 
     methodName switch
     {
@@ -95,16 +111,40 @@
       _ => Color.Dark
     };
 
+  private void CloseAlert()
+  {
+    showInfo = false;
+  }
+
   protected override async Task OnInitializedAsync()
   {
+    baseUrl = Configuration.GetValue<string>("Server:BaseAddress");
+    if (!baseUrl!.EndsWith("/"))
+    {
+      baseUrl += "/";
+    }
     ProjectProps.Clear();
     projects = await ProjectApi.GetProjects("goldlight");
+    loading = false;
   }
 
   private void NavigateToUpload(Project project, bool edit, RequestResponsePair? requestResponsePair = null)
   {
     ProjectProps.Set(project, requestResponsePair);
     NavigationManager.NavigateTo($"/rrpair/upload?Edit={edit}");
+  }
+
+  private async Task WriteUrl(Project project, RequestResponsePair rrpair)
+  {
+    string endpoint = $"{baseUrl}{project.Organization}/{project.FriendlyName}{rrpair.UrlFriendlyPath()}";
+    await Clipboard.CopyToClipboard(endpoint);
+    ShowInfo($"{endpoint} copied to clipboard");
+  }
+
+  private void ShowInfo(string text)
+  {
+    infoMessage = text;
+    showInfo = true;
   }
 
   private async Task Clone(Project project, RequestResponsePair rrpair)
@@ -124,7 +164,7 @@
       "Deleting a project cannot be undone. Any endpoints will no longer be available.", yesText: "Delete", cancelText: "Cancel");
     if (result.HasValue && result.Value)
     {
-      projects.Remove(project);
+      projects!.Remove(project);
       await ProjectApi.DeleteProject(project.Id.ToString());
     }
     submitting = false;

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Rendering;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 
 namespace Goldlight.Blazor.VirtualServer.Components;
 
@@ -17,8 +18,8 @@ public class Loading : ComponentBase
       // Add MudProgressCircular as a child of this component
       builder.OpenComponent<MudBlazor.MudProgressCircular>(0);
       builder.AddAttribute(1, "Size", MudBlazor.Size.Small);
-      builder.AddAttribute(2, "IsIndeterminate", true);
-      builder.AddAttribute(3, "Class", "mb-8");
+      builder.AddAttribute(2, "Indeterminate", true);
+      builder.AddAttribute(3, "Color", MudBlazor.Color.Primary);
       builder.CloseComponent();
     }
     else

@@ -13,6 +13,7 @@ public static class ModelExtensions
       HttpHeader header = new() { Name = hdr.Name, Value = hdr.Value };
       requestHeaders.Add(header);
     }
+
     ObservableCollection<HttpHeader> responseHeaders = new();
     foreach (HttpHeader hdr in pair.Response.Headers)
     {
@@ -47,4 +48,7 @@ public static class ModelExtensions
       }
     };
   }
+
+  public static string UrlFriendlyPath(this RequestResponsePair pair) =>
+    pair.Request.Summary.Path!.StartsWith("/") ? pair.Request.Summary.Path : $"/{pair.Request.Summary.Path}";
 }
