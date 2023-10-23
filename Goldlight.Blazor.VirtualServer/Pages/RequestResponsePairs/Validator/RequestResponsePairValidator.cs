@@ -2,7 +2,7 @@
 using FluentValidation.Results;
 using Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 
-namespace Goldlight.Blazor.VirtualServer.Components.RequestResponse.Validator;
+namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Validator;
 
 public class RequestResponsePairValidator : AbstractValidator<RequestResponsePair>
 {

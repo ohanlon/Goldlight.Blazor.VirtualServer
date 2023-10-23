@@ -1,13 +1,163 @@
 ﻿@page "/rrpair/upload"
+@using System.Collections.ObjectModel
 
-@using Goldlight.Blazor.VirtualServer.Components.RequestResponse
+@using Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Validator
+
+@inject ProjectProps ProjectProps
+@inject NavigationManager NavigationManager
+@inject ProjectApi ProjectApi
+
 <PageTitle>Response/Response</PageTitle>
 
-<RequestEditor EditProject="@Edit" />
+<MudForm @ref="form" Model="RequestResponsePair" Validation="@(validator.ValidateValue)" ValidationDelay="0">
+  <MudGrid>
+    <MudItem xs="12">
+      <MudTextField Label="Name" Immediate @bind-Value="RequestResponsePair.Name" For="@(() => RequestResponsePair.Name)"/>
+      <MudTextField Label="Description" Immediate Lines="3" @bind-Value="RequestResponsePair.Description" For="@(() => RequestResponsePair.Description)"/>
+    </MudItem>
+    <MudItem xs="6">
+      <DataContainer HasData="!Edit">
+        <DataTemplate>
+          <UploadRequestResponse FileTypes=".request" OnRequestUploaded="OnRequestUploadedAsync" Upload="UploadRequestResponse.UploadType.Request"/>
+        </DataTemplate>
+      </DataContainer>
+      <MudSelect Dense Immediate @bind-Value="RequestResponsePair.Request.Summary.Method" For="() => RequestResponsePair.Request.Summary.Method">
+        @foreach (string method in httpMethods)
+        {
+          <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
+        }
+      </MudSelect>
+      <MudTextField Label="Protocol" @bind-Value="RequestResponsePair.Request.Summary.Protocol" For="@(() => RequestResponsePair.Request.Summary.Protocol)"/>
+      <MudTextField Label="Path" @bind-Value="RequestResponsePair.Request.Summary.Path" For="@(() => RequestResponsePair.Request.Summary.Path)"/>
+      <MudExpansionPanels Dense Class="mt-0" Elevation="0">
+        <MudExpansionPanel Dense Class="mt-0 pl=0" Text="Headers" @bind-IsExpanded="requestHeaderExpanded">
+          <MudButton OnClick="@(() => AddHeader(RequestResponsePair.Request.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
+          <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="HttpHeader" Items="RequestResponsePair.Request.Headers" Style="align-items: center;">
+            <Columns>
+              <PropertyColumn Property="hdr => hdr.Name"/>
+              <PropertyColumn Property="hdr => hdr.Value"/>
+              <TemplateColumn CellClass="d-flex justify-end">
+                <EditTemplate>
+                  <MudTooltip Text="Delete this header">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteHeader(RequestResponsePair.Request.Headers, context.Item))"/>
+                  </MudTooltip>
+                </EditTemplate>
+              </TemplateColumn>
+            </Columns>
+          </MudDataGrid>
+        </MudExpansionPanel>
+      </MudExpansionPanels>
+      <MudTextField Label="Content" Immediate @bind-Value="RequestResponsePair.Request.Content" For="@(() => RequestResponsePair.Request.Content)" Lines="20"/>
+    </MudItem>
+    <MudItem xs="6">
+      <DataContainer HasData="!Edit">
+        <DataTemplate>
+          <UploadRequestResponse FileTypes=".response" ButtonText="Upload Response" OnResponseUploaded="OnResponseUploadedAsync" Upload="UploadRequestResponse.UploadType.Response"/>
+        </DataTemplate>
+      </DataContainer>
+      <MudTextField Label="Protocol" Immediate @bind-Value="RequestResponsePair.Response.Summary.Protocol" For="@(() => RequestResponsePair.Response.Summary.Protocol)"/>
+      <MudNumericField Label="Status" Immediate @bind-Value="RequestResponsePair.Response.Summary.Status" For="@(() => RequestResponsePair.Response.Summary.Status)"/>
+      <MudExpansionPanels Dense Class="mt-0" Elevation="0">
+        <MudExpansionPanel Dense Class="mt-0 pl=0" DisableGutters Text="Headers" @bind-IsExpanded="responseHeaderExpanded">
+          <MudButton OnClick="@(() => AddHeader(RequestResponsePair.Response.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
+          <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="HttpHeader" Items="RequestResponsePair.Response.Headers" Style="align-items: center;">
+            <Columns>
+              <PropertyColumn Property="hdr => hdr.Name"/>
+              <PropertyColumn Property="hdr => hdr.Value"/>
+              <TemplateColumn CellClass="d-flex justify-end">
+                <EditTemplate>
+                  <MudTooltip Text="Delete this header">
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteHeader(RequestResponsePair.Response.Headers, context.Item))"/>
+                  </MudTooltip>
+                </EditTemplate>
+              </TemplateColumn>
+            </Columns>
+          </MudDataGrid>
+        </MudExpansionPanel>
+      </MudExpansionPanels>
+      <MudTextField Label="Content" Immediate @bind-Value="RequestResponsePair.Response.Content" For="@(() => RequestResponsePair.Response.Content)" Lines="20"/>
+    </MudItem>
+  </MudGrid>
+  <MudButton Disabled="submitted" OnClick="(async () => await OnSubmitAsync())" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">Save</MudButton>
+</MudForm>
 
 @code
 {
   [Parameter]
   [SupplyParameterFromQuery]
   public bool Edit { get; set; }
+
+  public RequestResponsePair RequestResponsePair { get; set; } = new();
+  private bool requestHeaderExpanded = true;
+  private bool responseHeaderExpanded = true;
+  private Project? project;
+  private bool submitted;
+  private MudForm form = null!;
+  private readonly RequestResponsePairValidator validator = new();
+
+  private readonly string[] httpMethods =
+  {
+    "POST",
+    "GET",
+    "PUT",
+    "PATCH",
+    "DELETE",
+    "OPTIONS",
+    "ANY"
+  };
+
+  protected override void OnInitialized()
+  {
+    if (ProjectProps.SelectedProject is null)
+    {
+      NavigationManager.NavigateTo("/");
+    }
+    project = ProjectProps.SelectedProject!;
+    project.RequestResponses ??= new List<RequestResponsePair>();
+    if (!Edit)
+    {
+      project.RequestResponses.Add(RequestResponsePair);
+    }
+    else
+    {
+      RequestResponsePair = ProjectProps.SelectedRequestResponse!;
+    }
+  }
+
+  private void DeleteHeader(ObservableCollection<HttpHeader> headers, HttpHeader header)
+  {
+    headers.Remove(header);
+  }
+
+  private void AddHeader(ObservableCollection<HttpHeader> headers)
+  {
+    headers.Add(new HttpHeader());
+  }
+
+  private async Task OnSubmitAsync()
+  {
+    submitted = true;
+    await form.Validate();
+    if (form.IsValid)
+    {
+      await ProjectApi.UpdateProject(project!);
+      ProjectProps.Clear();
+      NavigationManager.NavigateTo("/");
+    }
+    submitted = false;
+  }
+
+  private async Task OnResponseUploadedAsync(Response response)
+  {
+    RequestResponsePair.Response = response;
+    StateHasChanged();
+    await form.Validate();
+  }
+
+  private async Task OnRequestUploadedAsync(Request request)
+  {
+    RequestResponsePair.Request = request;
+    StateHasChanged();
+    await form.Validate();
+  }
 }

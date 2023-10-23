@@ -19,14 +19,16 @@
 <Loading IsLoading="loading">
   <Loaded>
     <DataContainer HasData="@(projects is not null)">
+      <NoData>
+        <MudText>No projects are present</MudText>
+      </NoData>
       <DataTemplate>
         <MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc" Style="align-items: center;">
           <ToolBarContent>
             <MudText Typo="Typo.h6">Projects</MudText>
             <MudSpacer/>
             <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
-
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/> 
           </ToolBarContent>
           <Columns>
             <HierarchyColumn T="Project"/>
@@ -34,7 +36,7 @@
             <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name"/>
             <TemplateColumn Title="Base URL">
               <CellTemplate>
-                <MudText>@baseUrl@context.Item.Organization/@context.Item.FriendlyName</MudText>
+                <MudText>@context.Item.ServiceBaseUrl(baseUrl)</MudText>
               </CellTemplate>
             </TemplateColumn>
             <TemplateColumn CellClass="d-flex justify-end">
@@ -62,7 +64,7 @@
                       </CardHeaderContent>
                       <CardHeaderActions>
                         <MudTooltip Text="Copy the URL to the clipboard.">
-                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Default" OnClick="@(() => WriteUrl(context.Item, rrpair))" />
+                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Default" OnClick="@(() => WriteUrl(context.Item, rrpair))"/>
                         </MudTooltip>
                         <MudTooltip Text="Clone this request/response">
                           <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.PlusOne" Color="Color.Default" OnClick="@(() => Clone(context.Item, rrpair))"/>
@@ -91,7 +93,7 @@
 
 
 @code {
-  private string? baseUrl;
+  private string baseUrl = null!;
   private string? searchString;
   private Func<Project, bool> QuickFilterFunc => row => string.IsNullOrWhiteSpace(searchString) || row.Name!.Contains(searchString, StringComparison.OrdinalIgnoreCase) || row.FriendlyName!.Contains(searchString, StringComparison.OrdinalIgnoreCase);
   private ObservableCollection<Project>? projects;
@@ -118,7 +120,7 @@
 
   protected override async Task OnInitializedAsync()
   {
-    baseUrl = Configuration.GetValue<string>("Server:BaseAddress");
+    baseUrl = Configuration.GetValue<string>("Server:BaseAddress")!;
     if (!baseUrl!.EndsWith("/"))
     {
       baseUrl += "/";
@@ -136,23 +138,18 @@
 
   private async Task WriteUrl(Project project, RequestResponsePair rrpair)
   {
-    string endpoint = $"{baseUrl}{project.Organization}/{project.FriendlyName}{rrpair.UrlFriendlyPath()}";
+    string endpoint = $"{project.ServiceBaseUrl(baseUrl)}{rrpair.UrlFriendlyPath()}";
     await Clipboard.CopyToClipboard(endpoint);
-    ShowInfo($"{endpoint} copied to clipboard");
-  }
-
-  private void ShowInfo(string text)
-  {
-    infoMessage = text;
+    infoMessage = $"{endpoint} copied to clipboard";
     showInfo = true;
   }
 
   private async Task Clone(Project project, RequestResponsePair rrpair)
   {
     submitting = true;
-    var rrpairClone = rrpair.Clone();
+    RequestResponsePair rrpairClone = rrpair.Clone();
     project.RequestResponses!.Add(rrpairClone);
-    var updatedProject = await ProjectApi.UpdateProject(project);
+    Project? updatedProject = await ProjectApi.UpdateProject(project);
     project.Version = updatedProject!.Version;
     NavigateToUpload(project, true, rrpairClone);
   }

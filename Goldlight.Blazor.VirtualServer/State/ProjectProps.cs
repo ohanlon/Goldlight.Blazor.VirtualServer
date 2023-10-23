@@ -8,7 +8,7 @@ public class ProjectProps
   public Project? SelectedProject { get; private set; }
   public RequestResponsePair? SelectedRequestResponse { get; private set; }
 
-  public void Set(Project project, RequestResponsePair requestResponsePair)
+  public void Set(Project project, RequestResponsePair? requestResponsePair)
   {
     SelectedProject = project;
     SelectedRequestResponse = requestResponsePair;
