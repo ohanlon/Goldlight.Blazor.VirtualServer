@@ -1,29 +1,33 @@
 ﻿@page "/settings/organization"
-@using Goldlight.Blazor.VirtualServer.Api
-@using Goldlight.Blazor.VirtualServer.Models
 
 @inject OrganizationApi OrganizationApi
 
-<PageTitle>Organization</PageTitle>
+<PageTitle>Organization Settings</PageTitle>
 
-<DataContainer HasData="@(organization is not null)">
-  <NoData>
-    <MudText>No organization details present</MudText>
-  </NoData>
-  <DataTemplate>
-    <MudText Typo="Typo.h2">Organization details</MudText>
-    <MudText Typo="Typo.h3">Name:</MudText>
-    <MudText>@organization!.Name</MudText>
-    <MudText Typo="Typo.h2">API</MudText>
-    <MudText Typo="Typo.h3">API Key:</MudText>
-    <MudText>@organization!.ApiKey</MudText>
-  </DataTemplate>
-</DataContainer>
+<Loading IsLoading="loading">
+  <Loaded>
+    <DataContainer HasData="@(organization is not null)">
+      <NoData>
+        <MudText>No organization details present</MudText>
+      </NoData>
+      <DataTemplate>
+        <MudText Typo="Typo.h3">Organization details</MudText>
+        <MudText Typo="Typo.subtitle1">Name:</MudText>
+        <MudText>@organization!.Name</MudText>
+        <MudText Typo="Typo.h3">API</MudText>
+        <MudText Typo="Typo.subtitle1">API Key:</MudText>
+        <MudText>@organization!.ApiKey</MudText>
+      </DataTemplate>
+    </DataContainer>
+  </Loaded>
+</Loading>
 
 @code {
   private ExtendedOrganization? organization;
+  private bool loading = true;
   protected override async Task OnInitializedAsync()
   {
     organization = await OrganizationApi.GetOrganizationAsync("goldlight");
+    loading = false;
   }
 }

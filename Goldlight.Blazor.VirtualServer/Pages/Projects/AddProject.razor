@@ -1,24 +1,38 @@
 ﻿@page "/projects/addproject"
+@inject NavigationManager NavigationManager
+@inject ProjectApi ProjectApi
+@inject IDialogService DialogService
 
-<PageTitle>Add project</PageTitle>
+<PageTitle>Add Project</PageTitle>
 
 <EditForm Model="@project" OnValidSubmit="OnValidSubmit">
   <DataAnnotationsValidator/>
   <MudCard>
     <MudCardContent>
-      <MudTextField Label="Project name" @bind-Value="project.Name" />
-      <MudTextField Label="Friendly name" @bind-Value="project.FriendlyName" ReadOnly />
-      <MudTextField Label="Project description" @bind-Value="project.Description" />
-      <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Add project</MudButton>
+      <MudTextField Label="Project name" @bind-Value="project.Name" For="@(() => project.Name)"/>
+      <MudTextField Label="Friendly name" @bind-Value="project.FriendlyName" For="@(() => project.FriendlyName)"/>
+      <UrlFriendlyProject Project="@project" />
+      <MudTextField Label="Project description" Lines="10" @bind-Value="project.Description" For="@(() => project.Description)"/>
+      <MudButton Disabled="submitted" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-2">Add project</MudButton>
     </MudCardContent>
   </MudCard>
 </EditForm>
 
 @code {
+  private readonly Project project = new() { Organization = "goldlight" };
+  bool submitted;
 
-  Project project = new();
-  private void OnValidSubmit(EditContext context)
+  private async Task OnValidSubmit(EditContext context)
   {
-    StateHasChanged();
+    submitted = true;
+    bool? result = await DialogService.ShowMessageBox("Warning",
+      "The friendly name cannot be changed once you have saved this record. Are you sure you want to continue saving?", yesText: "Yes", cancelText: "Cancel");
+    if (result.HasValue && result.Value)
+    {
+      await ProjectApi.SaveProject(project);
+      NavigationManager.NavigateTo("/");
+    }
+    submitted = false;
   }
+
 }

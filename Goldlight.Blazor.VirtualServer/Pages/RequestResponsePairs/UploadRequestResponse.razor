@@ -1,0 +1,59 @@
+﻿@using Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser
+@using Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs
+
+<MudCard Class="d-flex align-center justify-center mud-width-full" Elevation="0">
+  <MudFileUpload T="IBrowserFile" FilesChanged="UploadFileAsync" Accept="@FileTypes">
+    <ButtonTemplate>
+      <MudButton HtmlTag="label"
+                 Variant="Variant.Filled"
+                 Color="Color.Primary"
+                 StartIcon="@Icons.Material.Filled.CloudUpload"
+                 for="@context">
+        @ButtonText
+      </MudButton>
+    </ButtonTemplate>
+  </MudFileUpload>
+</MudCard>
+
+@code {
+  public enum UploadType
+  {
+    Request,
+    Response
+  }
+
+  [Parameter] public UploadType Upload { get; set; }
+  [Parameter] public string FileTypes { get; set; } = null!;
+  [Parameter] public string ButtonText { get; set; } = "Upload Request";
+  [Parameter] public EventCallback<Request> OnRequestUploaded { get; set; }
+  [Parameter] public EventCallback<Response> OnResponseUploaded { get; set; }
+
+  private readonly RequestParser requestParser = new();
+  private readonly ResponseParser responseParser = new();
+
+  private async Task UploadFileAsync(IBrowserFile file)
+  {
+    switch (Upload)
+    {
+      case UploadType.Request:
+        var request = requestParser.Parse(await ReadFileAsync(file));
+        await OnRequestUploaded.InvokeAsync(request);
+        break;
+      case UploadType.Response:
+        var response = responseParser.Parse(await ReadFileAsync(file));
+        await OnResponseUploaded.InvokeAsync(response);
+        break;
+      default:
+        throw new ArgumentOutOfRangeException();
+    }
+  }
+
+  private static async Task<string> ReadFileAsync(IBrowserFile file)
+  {
+    await using Stream stream = file.OpenReadStream();
+    using StreamReader reader = new StreamReader(stream);
+    string fileContents = await reader.ReadToEndAsync();
+    return fileContents;
+  }
+
+}
