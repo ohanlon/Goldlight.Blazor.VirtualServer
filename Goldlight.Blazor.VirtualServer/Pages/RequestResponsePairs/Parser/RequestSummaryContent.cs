@@ -4,7 +4,8 @@ namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser;
 
 public class RequestSummaryContent : LineContent<Request>
 {
-  public override bool HasSummary(Request request, string line) => string.IsNullOrWhiteSpace(request.Summary.Path) && !string.IsNullOrWhiteSpace(line);
+  public override bool SummaryIsMissing(Request request, string line) =>
+    string.IsNullOrWhiteSpace(request.Summary.Path) && !string.IsNullOrWhiteSpace(line);
 
   public override void FillSummary(Request request, string line)
   {

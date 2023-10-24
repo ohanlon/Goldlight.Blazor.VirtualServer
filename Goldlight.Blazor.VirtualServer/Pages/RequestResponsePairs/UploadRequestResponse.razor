@@ -23,24 +23,24 @@
   }
 
   [Parameter] public UploadType Upload { get; set; }
-  [Parameter] public string? FileTypes { get; set; }
+  [Parameter] public string FileTypes { get; set; } = null!;
   [Parameter] public string ButtonText { get; set; } = "Upload Request";
   [Parameter] public EventCallback<Request> OnRequestUploaded { get; set; }
   [Parameter] public EventCallback<Response> OnResponseUploaded { get; set; }
 
-  private readonly RequestHandler requestHandler = new();
-  private readonly ResponseHandler responseHandler = new();
+  private readonly RequestParser requestParser = new();
+  private readonly ResponseParser responseParser = new();
 
   private async Task UploadFileAsync(IBrowserFile file)
   {
     switch (Upload)
     {
       case UploadType.Request:
-        var request = requestHandler.Parse(await ReadFileAsync(file));
+        var request = requestParser.Parse(await ReadFileAsync(file));
         await OnRequestUploaded.InvokeAsync(request);
         break;
       case UploadType.Response:
-        var response = responseHandler.Parse(await ReadFileAsync(file));
+        var response = responseParser.Parse(await ReadFileAsync(file));
         await OnResponseUploaded.InvokeAsync(response);
         break;
       default:
@@ -50,7 +50,7 @@
 
   private static async Task<string> ReadFileAsync(IBrowserFile file)
   {
-    await using var stream = file.OpenReadStream();
+    await using Stream stream = file.OpenReadStream();
     using StreamReader reader = new StreamReader(stream);
     string fileContents = await reader.ReadToEndAsync();
     return fileContents;

@@ -4,7 +4,8 @@ namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser;
 
 public class ResponseSummaryContent : LineContent<Response>
 {
-  public override bool HasSummary(Response response, string line) => response.Summary.Status is null && !string.IsNullOrWhiteSpace(line);
+  public override bool SummaryIsMissing(Response response, string line) =>
+    response.Summary.Status is null && !string.IsNullOrWhiteSpace(line);
 
   public override void FillSummary(Response response, string line)
   {

@@ -9,11 +9,11 @@
 
 <PageTitle>Response/Response</PageTitle>
 
-<MudForm @ref="form" Model="RequestResponsePair" Validation="@(validator.ValidateValue)" ValidationDelay="0">
+<MudForm @ref="form" Model="requestResponsePair" Validation="@(validator.ValidateValue)" ValidationDelay="0">
   <MudGrid>
     <MudItem xs="12">
-      <MudTextField Label="Name" Immediate @bind-Value="RequestResponsePair.Name" For="@(() => RequestResponsePair.Name)"/>
-      <MudTextField Label="Description" Immediate Lines="3" @bind-Value="RequestResponsePair.Description" For="@(() => RequestResponsePair.Description)"/>
+      <MudTextField Label="Name" Immediate @bind-Value="requestResponsePair.Name" For="@(() => requestResponsePair.Name)"/>
+      <MudTextField Label="Description" Immediate Lines="3" @bind-Value="requestResponsePair.Description" For="@(() => requestResponsePair.Description)"/>
     </MudItem>
     <MudItem xs="6">
       <DataContainer HasData="!Edit">
@@ -21,25 +21,25 @@
           <UploadRequestResponse FileTypes=".request" OnRequestUploaded="OnRequestUploadedAsync" Upload="UploadRequestResponse.UploadType.Request"/>
         </DataTemplate>
       </DataContainer>
-      <MudSelect Dense Immediate @bind-Value="RequestResponsePair.Request.Summary.Method" For="() => RequestResponsePair.Request.Summary.Method">
+      <MudSelect Dense Immediate @bind-Value="requestResponsePair.Request.Summary.Method" For="() => requestResponsePair.Request.Summary.Method">
         @foreach (string method in httpMethods)
         {
           <MudSelectItem T="string" Value="@method">@method</MudSelectItem>
         }
       </MudSelect>
-      <MudTextField Label="Protocol" @bind-Value="RequestResponsePair.Request.Summary.Protocol" For="@(() => RequestResponsePair.Request.Summary.Protocol)"/>
-      <MudTextField Label="Path" @bind-Value="RequestResponsePair.Request.Summary.Path" For="@(() => RequestResponsePair.Request.Summary.Path)"/>
+      <MudTextField Label="Protocol" @bind-Value="requestResponsePair.Request.Summary.Protocol" For="@(() => requestResponsePair.Request.Summary.Protocol)"/>
+      <MudTextField Label="Path" @bind-Value="requestResponsePair.Request.Summary.Path" For="@(() => requestResponsePair.Request.Summary.Path)"/>
       <MudExpansionPanels Dense Class="mt-0" Elevation="0">
         <MudExpansionPanel Dense Class="mt-0 pl=0" Text="Headers" @bind-IsExpanded="requestHeaderExpanded">
-          <MudButton OnClick="@(() => AddHeader(RequestResponsePair.Request.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
-          <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="HttpHeader" Items="RequestResponsePair.Request.Headers" Style="align-items: center;">
+          <MudButton OnClick="@(() => AddHeader(requestResponsePair.Request.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
+          <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="HttpHeader" Items="requestResponsePair.Request.Headers" Style="align-items: center;">
             <Columns>
               <PropertyColumn Property="hdr => hdr.Name"/>
               <PropertyColumn Property="hdr => hdr.Value"/>
               <TemplateColumn CellClass="d-flex justify-end">
                 <EditTemplate>
                   <MudTooltip Text="Delete this header">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteHeader(RequestResponsePair.Request.Headers, context.Item))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteHeader(requestResponsePair.Request.Headers, context.Item))"/>
                   </MudTooltip>
                 </EditTemplate>
               </TemplateColumn>
@@ -47,7 +47,7 @@
           </MudDataGrid>
         </MudExpansionPanel>
       </MudExpansionPanels>
-      <MudTextField Label="Content" Immediate @bind-Value="RequestResponsePair.Request.Content" For="@(() => RequestResponsePair.Request.Content)" Lines="20"/>
+      <MudTextField Label="Content" Immediate @bind-Value="requestResponsePair.Request.Content" For="@(() => requestResponsePair.Request.Content)" Lines="20"/>
     </MudItem>
     <MudItem xs="6">
       <DataContainer HasData="!Edit">
@@ -55,19 +55,19 @@
           <UploadRequestResponse FileTypes=".response" ButtonText="Upload Response" OnResponseUploaded="OnResponseUploadedAsync" Upload="UploadRequestResponse.UploadType.Response"/>
         </DataTemplate>
       </DataContainer>
-      <MudTextField Label="Protocol" Immediate @bind-Value="RequestResponsePair.Response.Summary.Protocol" For="@(() => RequestResponsePair.Response.Summary.Protocol)"/>
-      <MudNumericField Label="Status" Immediate @bind-Value="RequestResponsePair.Response.Summary.Status" For="@(() => RequestResponsePair.Response.Summary.Status)"/>
+      <MudTextField Label="Protocol" Immediate @bind-Value="requestResponsePair.Response.Summary.Protocol" For="@(() => requestResponsePair.Response.Summary.Protocol)"/>
+      <MudNumericField Label="Status" Immediate @bind-Value="requestResponsePair.Response.Summary.Status" For="@(() => requestResponsePair.Response.Summary.Status)"/>
       <MudExpansionPanels Dense Class="mt-0" Elevation="0">
         <MudExpansionPanel Dense Class="mt-0 pl=0" DisableGutters Text="Headers" @bind-IsExpanded="responseHeaderExpanded">
-          <MudButton OnClick="@(() => AddHeader(RequestResponsePair.Response.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
-          <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="HttpHeader" Items="RequestResponsePair.Response.Headers" Style="align-items: center;">
+          <MudButton OnClick="@(() => AddHeader(requestResponsePair.Response.Headers))" Variant="Variant.Filled" Color="Color.Success">Add Header</MudButton>
+          <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="HttpHeader" Items="requestResponsePair.Response.Headers" Style="align-items: center;">
             <Columns>
               <PropertyColumn Property="hdr => hdr.Name"/>
               <PropertyColumn Property="hdr => hdr.Value"/>
               <TemplateColumn CellClass="d-flex justify-end">
                 <EditTemplate>
                   <MudTooltip Text="Delete this header">
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteHeader(RequestResponsePair.Response.Headers, context.Item))"/>
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" OnClick="@(() => DeleteHeader(requestResponsePair.Response.Headers, context.Item))"/>
                   </MudTooltip>
                 </EditTemplate>
               </TemplateColumn>
@@ -75,10 +75,10 @@
           </MudDataGrid>
         </MudExpansionPanel>
       </MudExpansionPanels>
-      <MudTextField Label="Content" Immediate @bind-Value="RequestResponsePair.Response.Content" For="@(() => RequestResponsePair.Response.Content)" Lines="20"/>
+      <MudTextField Label="Content" Immediate @bind-Value="requestResponsePair.Response.Content" For="@(() => requestResponsePair.Response.Content)" Lines="20"/>
     </MudItem>
   </MudGrid>
-  <MudButton Disabled="submitted" OnClick="(async () => await OnSubmitAsync())" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">Save</MudButton>
+  <MudButton Disabled="submitted" OnClick="async () => await OnSubmitAsync()" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">Save</MudButton>
 </MudForm>
 
 @code
@@ -87,10 +87,9 @@
   [SupplyParameterFromQuery]
   public bool Edit { get; set; }
 
-  public RequestResponsePair RequestResponsePair { get; set; } = new();
+  private RequestResponsePair requestResponsePair = new();
   private bool requestHeaderExpanded = true;
   private bool responseHeaderExpanded = true;
-  private Project? project;
   private bool submitted;
   private MudForm form = null!;
   private readonly RequestResponsePairValidator validator = new();
@@ -112,15 +111,14 @@
     {
       NavigationManager.NavigateTo("/");
     }
-    project = ProjectProps.SelectedProject!;
-    project.RequestResponses ??= new List<RequestResponsePair>();
+    ProjectProps.SelectedProject!.RequestResponses ??= new List<RequestResponsePair>();
     if (!Edit)
     {
-      project.RequestResponses.Add(RequestResponsePair);
+      ProjectProps.SelectedProject.RequestResponses.Add(requestResponsePair);
     }
     else
     {
-      RequestResponsePair = ProjectProps.SelectedRequestResponse!;
+      requestResponsePair = ProjectProps.SelectedRequestResponse!;
     }
   }
 
@@ -140,7 +138,7 @@
     await form.Validate();
     if (form.IsValid)
     {
-      await ProjectApi.UpdateProject(project!);
+      await ProjectApi.UpdateProject(ProjectProps.SelectedProject!);
       ProjectProps.Clear();
       NavigationManager.NavigateTo("/");
     }
@@ -149,14 +147,14 @@
 
   private async Task OnResponseUploadedAsync(Response response)
   {
-    RequestResponsePair.Response = response;
+    requestResponsePair.Response = response;
     StateHasChanged();
     await form.Validate();
   }
 
   private async Task OnRequestUploadedAsync(Request request)
   {
-    RequestResponsePair.Request = request;
+    requestResponsePair.Request = request;
     StateHasChanged();
     await form.Validate();
   }

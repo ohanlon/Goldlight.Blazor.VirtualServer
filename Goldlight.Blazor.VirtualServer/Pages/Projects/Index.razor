@@ -121,7 +121,7 @@
   protected override async Task OnInitializedAsync()
   {
     baseUrl = Configuration.GetValue<string>("Server:BaseAddress")!;
-    if (!baseUrl!.EndsWith("/"))
+    if (!baseUrl.EndsWith("/"))
     {
       baseUrl += "/";
     }

@@ -22,7 +22,7 @@ public static class ModelExtensions
       responseHeaders.Add(header);
     }
 
-    return new()
+    return new RequestResponsePair
     {
       Name = $"[CLONE] {pair.Name}",
       Description = pair.Description,

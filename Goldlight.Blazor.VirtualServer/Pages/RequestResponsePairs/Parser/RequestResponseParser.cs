@@ -7,27 +7,20 @@ public abstract class RequestResponseParser<T, TK> where T : class, new()
   {
     T response = new();
     string[] lines = file.Split(Environment.NewLine);
-    bool headerParsed = false;
-    HttpHeaderParser headerParser = new();
-
     TK lineContent = new();
     while (lines.Length > 0)
     {
       string line = lines[0];
       lines = lines.Skip(1).ToArray();
-      if (lineContent.HasSummary(response, line))
+      if (lineContent.SummaryIsMissing(response, line))
       {
         lineContent.FillSummary(response, line);
         continue;
       }
-      if (!headerParsed)
+
+      if (!lineContent.HeaderParseCompleted)
       {
-        if (string.IsNullOrWhiteSpace(line))
-        {
-          headerParsed = true;
-          continue;
-        }
-        lineContent.AddHeader(response, headerParser, line);
+        lineContent.AddHeader(response, line);
         continue;
       }
 
@@ -37,10 +30,11 @@ public abstract class RequestResponseParser<T, TK> where T : class, new()
       {
         continue;
       }
+
       lineContent.SetContent(response, line + string.Concat(lines));
       break;
     }
+
     return response;
   }
-
 }
