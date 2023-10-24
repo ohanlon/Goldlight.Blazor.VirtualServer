@@ -2,6 +2,6 @@
 
 namespace Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Parser;
 
-public class ResponseParser : RequestResponseParser<Response, ResponseSummaryContent>
+public class ResponseParser : RequestResponseParser<Response, ResponseLineContent>
 {
 }

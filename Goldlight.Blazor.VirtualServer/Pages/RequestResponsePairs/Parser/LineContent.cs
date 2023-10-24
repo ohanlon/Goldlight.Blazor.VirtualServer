@@ -7,7 +7,10 @@ public abstract class LineContent<T>
 {
   public abstract bool SummaryIsMissing(T content, string line);
 
-  public abstract void FillSummary(T content, string line);
+  public void FillSummary(T content, string line)
+  {
+    Parse(content, line);
+  }
 
   public bool HeaderParseCompleted;
 
@@ -19,13 +22,15 @@ public abstract class LineContent<T>
       return;
     }
 
-    AddHeader(content, Parse(line));
+    AddHeader(content, ParseHeader(line));
   }
 
   public abstract void SetContent(T content, string lines);
   protected abstract void AddHeader(T content, HttpHeader headerLine);
 
-  private HttpHeader Parse(string requestLine)
+  protected abstract void Parse(T content, string requestLine);
+
+  private HttpHeader ParseHeader(string requestLine)
   {
     HttpHeader header = new();
     var match = Regex.Match(requestLine.Trim(), @"(?<name>[\w\-]+):\s+(?<value>.*)");

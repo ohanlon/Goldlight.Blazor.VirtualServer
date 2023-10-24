@@ -11,16 +11,16 @@
 
 <PageTitle>Projects</PageTitle>
 
-<DataContainer HasData="showInfo">
+<DataContainer HasData="!string.IsNullOrWhiteSpace(infoMessage)">
   <DataTemplate>
-    <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" Variant="Variant.Filled" ShowCloseIcon="true" CloseIconClicked="(()=>CloseAlert())">@infoMessage</MudAlert>
+    <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" Variant="Variant.Filled" ShowCloseIcon="true" CloseIconClicked="()=>infoMessage = string.Empty">@infoMessage</MudAlert>
   </DataTemplate>
 </DataContainer>
 <Loading IsLoading="loading">
   <Loaded>
     <DataContainer HasData="@(projects is not null)">
       <NoData>
-        <MudText>No projects are present</MudText>
+        <MudText Typo="Typo.caption">No projects are present</MudText>
       </NoData>
       <DataTemplate>
         <MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc" Style="align-items: center;">
@@ -64,7 +64,7 @@
                       </CardHeaderContent>
                       <CardHeaderActions>
                         <MudTooltip Text="Copy the URL to the clipboard.">
-                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Default" OnClick="@(() => WriteUrl(context.Item, rrpair))"/>
+                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Default" OnClick="@(() => CopyUrlToClipboard(context.Item, rrpair))"/>
                         </MudTooltip>
                         <MudTooltip Text="Clone this request/response">
                           <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.PlusOne" Color="Color.Default" OnClick="@(() => Clone(context.Item, rrpair))"/>
@@ -99,7 +99,6 @@
   private ObservableCollection<Project>? projects;
   private bool submitting;
   private bool loading = true;
-  private bool showInfo;
   private string infoMessage = "";
   static Color GetColor(string methodName) => 
     methodName switch
@@ -113,21 +112,22 @@
       _ => Color.Dark
     };
 
-  private void CloseAlert()
-  {
-    showInfo = false;
-  }
-
   protected override async Task OnInitializedAsync()
   {
-    baseUrl = Configuration.GetValue<string>("Server:BaseAddress")!;
-    if (!baseUrl.EndsWith("/"))
+    try
     {
-      baseUrl += "/";
+      baseUrl = Configuration.GetValue<string>("Server:BaseAddress")!;
+      if (!baseUrl.EndsWith("/"))
+      {
+        baseUrl += "/";
+      }
+      ProjectProps.Clear();
+      projects = await ProjectApi.GetProjects("goldlight");
     }
-    ProjectProps.Clear();
-    projects = await ProjectApi.GetProjects("goldlight");
-    loading = false;
+    finally
+    {
+      loading = false;
+    }
   }
 
   private void NavigateToUpload(Project project, bool edit, RequestResponsePair? requestResponsePair = null)
@@ -136,12 +136,11 @@
     NavigationManager.NavigateTo($"/rrpair/upload?Edit={edit}");
   }
 
-  private async Task WriteUrl(Project project, RequestResponsePair rrpair)
+  private async Task CopyUrlToClipboard(Project project, RequestResponsePair rrpair)
   {
     string endpoint = $"{project.ServiceBaseUrl(baseUrl)}{rrpair.UrlFriendlyPath()}";
     await Clipboard.CopyToClipboard(endpoint);
     infoMessage = $"{endpoint} copied to clipboard";
-    showInfo = true;
   }
 
   private async Task Clone(Project project, RequestResponsePair rrpair)
