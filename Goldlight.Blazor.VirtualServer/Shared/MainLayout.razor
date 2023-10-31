@@ -1,4 +1,8 @@
-﻿@inherits LayoutComponentBase
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+
+@inherits LayoutComponentBase
+@inject NavigationManager NavigationManager
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -6,10 +10,18 @@
 
 <MudLayout>
   <MudAppBar Elevation="0" Dense="true">
-    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())"/>
+    <MudIconButton Color="Color.Inherit" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu" OnClick="@(e => DrawerToggle())" />
     <MudSpacer/>
-    <MudIconButton Icon="@Icons.Custom.Brands.MudBlazor" Color="Color.Inherit" Link="https://mudblazor.com/" Target="_blank"/>
-    <MudIconButton Icon="@Icons.Custom.Brands.GitHub" Color="Color.Inherit" Link="https://github.com/MudBlazor/MudBlazor/" Target="_blank"/>
+    <MudMenu AnchorOrigin="Origin.BottomCenter" Color="Color.Inherit" Dense Icon="@Icons.Material.Filled.MoreVert">
+      <AuthorizeView>
+        <Authorized>
+          <MudMenuItem Icon="@Icons.Material.Filled.Logout" OnClick="Logout">Log out</MudMenuItem>
+        </Authorized>
+        <NotAuthorized>
+          <MudMenuItem Href="authentication/login" Icon="@Icons.Material.Filled.Login">Log in</MudMenuItem>
+        </NotAuthorized>
+      </AuthorizeView>
+    </MudMenu>
   </MudAppBar>
   <MudDrawer @bind-Open="@drawerOpen" Breakpoint="Breakpoint.Sm" Elevation="1" Variant="@DrawerVariant.Mini" ClipMode="@DrawerClipMode.Docked">
     <NavMenu/>
@@ -22,10 +34,16 @@
 </MudLayout>
 
 @code {
-    bool drawerOpen = true;
+  bool drawerOpen = true;
 
-    void DrawerToggle()
-    {
-        drawerOpen = !drawerOpen;
-    }
+  void DrawerToggle()
+  {
+    drawerOpen = !drawerOpen;
+  }
+
+  private void Logout()
+  {
+    NavigationManager.NavigateToLogout("authentication/logout");
+  }
+
 }

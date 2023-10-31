@@ -3,6 +3,7 @@ using Goldlight.Blazor.VirtualServer.Api;
 using Goldlight.Blazor.VirtualServer.Services;
 using Goldlight.Blazor.VirtualServer.State;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using MudBlazor.Services;
 
@@ -16,5 +17,7 @@ builder.Services.AddMudServices();
 
 builder.Services.AddScoped<OrganizationApi>().AddScoped<ProjectApi>().AddScoped<ProjectProps>()
   .AddSingleton<Clipboard>();
+
+builder.Services.AddOidcAuthentication(options => { builder.Configuration.Bind("Keycloak", options.ProviderOptions); });
 
 await builder.Build().RunAsync();
