@@ -27,9 +27,9 @@ builder.Services.AddScoped<OrganizationApi>().AddScoped<ProjectApi>().AddScoped<
 builder.Services.AddOidcAuthentication(options =>
 {
   builder.Configuration.Bind("Keycloak", options.ProviderOptions);
-  //options.UserOptions.NameClaim = "preferred_username";
-  //options.UserOptions.RoleClaim = "roles";
-  //options.UserOptions.ScopeClaim = "scope";
+  options.UserOptions.NameClaim = "preferred_username";
+  options.UserOptions.RoleClaim = "roles";
+  options.UserOptions.ScopeClaim = "scope";
 });
 
 await builder.Build().RunAsync();

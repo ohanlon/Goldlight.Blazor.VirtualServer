@@ -1,8 +1,10 @@
 ﻿@page "/settings/organization"
+@using Microsoft.AspNetCore.Authorization
 
 @inject OrganizationApi OrganizationApi
 
 <PageTitle>Organization Settings</PageTitle>
+@attribute [Authorize]
 
 <Loading IsLoading="loading">
   <Loaded>

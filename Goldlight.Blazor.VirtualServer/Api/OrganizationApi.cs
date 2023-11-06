@@ -10,7 +10,8 @@ public class OrganizationApi
   public OrganizationApi(HttpClient httpClient)
   {
     this.httpClient = httpClient;
-  } 
+  }
 
-  public async Task<ExtendedOrganization?> GetOrganizationAsync(string? id) => await httpClient.Get<ExtendedOrganization>($"api/organization/{id}");
+  public async Task<ExtendedOrganization?> GetOrganizationAsync(string? name) =>
+    await httpClient.Get<ExtendedOrganization>($"api/organization/name/{name}");
 }
