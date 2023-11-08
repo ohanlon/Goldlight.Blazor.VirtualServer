@@ -4,6 +4,7 @@
 @inject OrganizationApi OrganizationApi
 
 <PageTitle>Organization Settings</PageTitle>
+
 @attribute [Authorize]
 
 <Loading IsLoading="loading">
@@ -11,6 +12,7 @@
     <DataContainer HasData="@(organization is not null)">
       <NoData>
         <MudText>No organization details present</MudText>
+        <MudButton Href="/organizations/addorganization" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Organization</MudButton>
       </NoData>
       <DataTemplate>
         <MudText Typo="Typo.h3">Organization details</MudText>
@@ -25,7 +27,7 @@
 </Loading>
 
 @code {
-  private ExtendedOrganization? organization;
+  private Organization? organization;
   private bool loading = true;
   protected override async Task OnInitializedAsync()
   {

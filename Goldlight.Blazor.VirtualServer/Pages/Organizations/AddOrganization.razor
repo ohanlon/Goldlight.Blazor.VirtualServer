@@ -1,0 +1,28 @@
+﻿@page "/organizations/addorganization"
+
+@inject OrganizationApi OrganizationApi
+@inject NavigationManager NavigationManager
+<PageTitle>Add Organization</PageTitle>
+
+<EditForm Model="@organization" OnValidSubmit="OnValidSubmit">
+  <DataAnnotationsValidator/>
+  <MudCard>
+    <MudCardContent>
+      <MudTextField Label="Organization name" @bind-Value="organization.Name" For="() => organization.Name"/>
+      <MudTextField Label="Friendly name" Disabled @bind-Value="organization.FriendlyName" For="() => organization.FriendlyName"/>
+      <MudTextField Label="API Key" Disabled @bind-Value="organization.ApiKey"/>
+      <MudButton Disabled="submitted" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Class="mt-2">Add Project</MudButton>
+    </MudCardContent>
+  </MudCard>
+</EditForm>
+@code {
+  readonly Organization organization = new() { ApiKey = Guid.NewGuid().ToString().Replace("-", "")};
+  bool submitted;
+
+  private async Task OnValidSubmit(EditContext context)
+  {
+    submitted = true;
+    await OrganizationApi.SaveOrganizationAsync(organization);
+    NavigationManager.NavigateTo("/");
+  }
+}

@@ -1,16 +1,30 @@
-﻿using System.Runtime.Serialization;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Net;
+using System.Runtime.Serialization;
 
 namespace Goldlight.Blazor.VirtualServer.Models;
 
 [DataContract]
 public class Organization
 {
-  [DataMember(Name = "id")]
-  public string? Id { get; set; }
+  private string name = null!;
+  [DataMember(Name = "id")] public Guid Id { get; set; } = Guid.Empty;
 
-  [DataMember(Name = "name")]
-  public string? Name { get; set; }
+  [DataMember(Name = "name"), MaxLength(120)]
+  public string Name
+  {
+    get => name;
+    set
+    {
+      name = value;
+      FriendlyName = WebUtility.UrlEncode(name.ToLowerInvariant());
+    }
+  }
 
-  [DataMember(Name = "version")]
-  public long? Version { get; set; }
+  [DataMember(Name = "friendlyname"), MaxLength(120)]
+  public string FriendlyName { get; set; } = null!;
+
+  [DataMember(Name = "version")] public long Version { get; set; }
+
+  [DataMember(Name = "api-key")] public string ApiKey { get; set; }
 }
