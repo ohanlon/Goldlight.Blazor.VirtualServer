@@ -1,4 +1,5 @@
-﻿using Goldlight.Blazor.VirtualServer.Extensions;
+﻿using System.Collections.ObjectModel;
+using Goldlight.Blazor.VirtualServer.Extensions;
 using Goldlight.Blazor.VirtualServer.Models;
 
 namespace Goldlight.Blazor.VirtualServer.Api;
@@ -17,4 +18,7 @@ public class OrganizationApi
 
   public async Task SaveOrganizationAsync(Organization organization) =>
     await httpClient.Post("api/organization", organization);
+
+  public async Task<List<Organization>?> GetOrganizationsAsync() =>
+    await httpClient.Get<List<Organization>>("api/organizations");
 }

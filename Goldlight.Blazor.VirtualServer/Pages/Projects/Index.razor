@@ -1,7 +1,6 @@
 ﻿@page "/"
-@using Goldlight.Blazor.VirtualServer.Extensions
-@using System.Collections.ObjectModel
 
+@inject OrganizationApi OrganizationApi
 @inject ProjectApi ProjectApi
 @inject ProjectProps ProjectProps
 @inject NavigationManager NavigationManager
@@ -10,6 +9,7 @@
 @inject IConfiguration Configuration
 
 <PageTitle>Projects</PageTitle>
+@attribute [Authorize]
 
 <DataContainer HasData="!string.IsNullOrWhiteSpace(infoMessage)">
   <DataTemplate>
@@ -18,6 +18,12 @@
 </DataContainer>
 <Loading IsLoading="loading">
   <Loaded>
+    <DataContainer HasData="@(organizations is not null)">
+      <NoData>
+        <MudText>No organization details present</MudText>
+        <MudButton Href="/organizations/addorganization" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Organization</MudButton>
+      </NoData>
+    </DataContainer>
     <DataContainer HasData="@(projects is not null)">
       <NoData>
         <MudText Typo="Typo.caption">No projects are present</MudText>
@@ -28,7 +34,7 @@
             <MudText Typo="Typo.h6">Projects</MudText>
             <MudSpacer/>
             <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/> 
+                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
           </ToolBarContent>
           <Columns>
             <HierarchyColumn T="Project"/>
@@ -100,6 +106,7 @@
   private bool submitting;
   private bool loading = true;
   private string infoMessage = "";
+  private List<Organization>? organizations;
   static Color GetColor(string methodName) => 
     methodName switch
     {

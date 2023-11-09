@@ -2,6 +2,7 @@
 
 @inherits LayoutComponentBase
 @inject NavigationManager NavigationManager
+@inject OrganizationApi OrganizationApi
 
 <MudThemeProvider />
 <MudDialogProvider />
@@ -11,6 +12,16 @@
   <MudAppBar Elevation="0" Dense="true">
     <MudIconButton Color="Color.Inherit" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu" OnClick="@(e => DrawerToggle())" />
     <MudSpacer/>
+    <DataContainer HasData="@(organizations is not null)">
+      <DataTemplate>
+        <MudSelect Dense T="Organization">
+          @foreach (var organization in organizations)
+          {
+            <MudSelectItem Value="organization.Name">@organization.FriendlyName</MudSelectItem>
+          }
+        </MudSelect>
+      </DataTemplate>
+    </DataContainer>
     <MudMenu AnchorOrigin="Origin.BottomCenter" Color="Color.Inherit" Dense Icon="@Icons.Material.Filled.MoreVert">
       <AuthorizeView>
         <Authorized>
@@ -34,6 +45,12 @@
 
 @code {
   bool drawerOpen = true;
+  private List<Organization>? organizations;
+
+  protected override async Task OnInitializedAsync()
+  {
+    organizations = await OrganizationApi.GetOrganizationsAsync();
+  }
 
   void DrawerToggle()
   {

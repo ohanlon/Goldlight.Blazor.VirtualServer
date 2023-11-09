@@ -4,6 +4,8 @@
 @inject NavigationManager NavigationManager
 <PageTitle>Add Organization</PageTitle>
 
+@attribute [Authorize]
+
 <EditForm Model="@organization" OnValidSubmit="OnValidSubmit">
   <DataAnnotationsValidator/>
   <MudCard>
