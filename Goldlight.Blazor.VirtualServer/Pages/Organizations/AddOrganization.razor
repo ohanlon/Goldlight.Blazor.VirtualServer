@@ -1,6 +1,7 @@
 ﻿@page "/organizations/addorganization"
 
 @inject OrganizationApi OrganizationApi
+@inject OrganizationProps OrganizationProps
 @inject NavigationManager NavigationManager
 <PageTitle>Add Organization</PageTitle>
 
@@ -17,7 +18,7 @@
     </MudCardContent>
   </MudCard>
 </EditForm>
-@code {
+ @code {
   readonly Organization organization = new() { ApiKey = Guid.NewGuid().ToString().Replace("-", "")};
   bool submitted;
 
@@ -25,6 +26,8 @@
   {
     submitted = true;
     await OrganizationApi.SaveOrganizationAsync(organization);
+    await OrganizationProps.LoadOrganizationsAsync();
+
     NavigationManager.NavigateTo("/");
   }
 }

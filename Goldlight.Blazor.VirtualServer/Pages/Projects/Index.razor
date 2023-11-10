@@ -1,12 +1,15 @@
 ﻿@page "/"
 
-@inject OrganizationApi OrganizationApi
+@inject OrganizationProps Organization
 @inject ProjectApi ProjectApi
 @inject ProjectProps ProjectProps
 @inject NavigationManager NavigationManager
 @inject IDialogService DialogService
 @inject Clipboard Clipboard
 @inject IConfiguration Configuration
+
+@using System.ComponentModel
+@implements IDisposable
 
 <PageTitle>Projects</PageTitle>
 @attribute [Authorize]
@@ -18,82 +21,84 @@
 </DataContainer>
 <Loading IsLoading="loading">
   <Loaded>
-    <DataContainer HasData="@(organizations is not null)">
+    <DataContainer HasData="@(Organization.SelectedOrganization is not null)">
       <NoData>
         <MudText>No organization details present</MudText>
         <MudButton Href="/organizations/addorganization" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Organization</MudButton>
       </NoData>
-    </DataContainer>
-    <DataContainer HasData="@(projects is not null)">
-      <NoData>
-        <MudText Typo="Typo.caption">No projects are present</MudText>
-      </NoData>
       <DataTemplate>
-        <MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc" Style="align-items: center;">
-          <ToolBarContent>
-            <MudText Typo="Typo.h6">Projects</MudText>
-            <MudSpacer/>
-            <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
-                          AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"/>
-          </ToolBarContent>
-          <Columns>
-            <HierarchyColumn T="Project"/>
-            <PropertyColumn Property="x => x.Name" Title="Name"/>
-            <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name"/>
-            <TemplateColumn Title="Base URL">
-              <CellTemplate>
-                <MudText>@context.Item.ServiceBaseUrl(baseUrl)</MudText>
-              </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn CellClass="d-flex justify-end">
-              <CellTemplate>
-                <MudTooltip Text="Delete this project">
-                  <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item))"/>
-                </MudTooltip>
-              </CellTemplate>
-            </TemplateColumn>
-          </Columns>
-          <ChildRowContent>
-            <DataContainer HasData="context.Item.RequestResponses is not null && context.Item.RequestResponses.Any()">
-              <DataTemplate>
-                @foreach (RequestResponsePair rrpair in context.Item.RequestResponses!)
-                {
-                  <MudCard Class="px-2 py-2 pl-2 pr-2">
-                    <MudCardHeader>
-                      <CardHeaderAvatar>
-                        <MudChip Color="@GetColor(rrpair.Request.Summary.Method)">@rrpair.Request.Summary.Method</MudChip>
-                        <MudChip Color="Color.Primary">@rrpair.Response.Summary.Status.ToString()</MudChip>
-                      </CardHeaderAvatar>
-                      <CardHeaderContent>
-                        <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
-                        <MudText Typo="Typo.subtitle2" Class="ml-2 pr-2">@rrpair.Request.Summary.Path</MudText>
-                      </CardHeaderContent>
-                      <CardHeaderActions>
-                        <MudTooltip Text="Copy the URL to the clipboard.">
-                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Default" OnClick="@(() => CopyUrlToClipboard(context.Item, rrpair))"/>
-                        </MudTooltip>
-                        <MudTooltip Text="Clone this request/response">
-                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.PlusOne" Color="Color.Default" OnClick="@(() => Clone(context.Item, rrpair))"/>
-                        </MudTooltip>
-                        <MudTooltip Text="Delete this request/response">
-                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))"/>
-                        </MudTooltip>
-                        <MudTooltip Text="Edit this request/response">
-                          <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="@(() => NavigateToUpload(context.Item, true, rrpair))"/>
-                        </MudTooltip>
-                      </CardHeaderActions>
-                    </MudCardHeader>
-                    <MudText Typo="Typo.body2">@rrpair.Description</MudText>
-                  </MudCard>
-                }
-              </DataTemplate>
-            </DataContainer>
-            <MudButton Disabled="submitting" OnClick="@(() => NavigateToUpload(context.Item, false))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Request/Response</MudButton>
-          </ChildRowContent>
-        </MudDataGrid>
+        <DataContainer HasData="@(projects is not null)">
+          <NoData>
+            <MudText Typo="Typo.caption">No projects are present</MudText>
+          </NoData>
+          <DataTemplate>
+            <MudDataGrid T="Project" Items="projects" Hover="true" QuickFilter="QuickFilterFunc" Style="align-items: center;">
+              <ToolBarContent>
+                <MudText Typo="Typo.h6">Projects</MudText>
+                <MudSpacer />
+                <MudTextField @bind-Value="searchString" Placeholder="Search" Adornment="Adornment.Start" Immediate="true"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0" />
+              </ToolBarContent>
+              <Columns>
+                <HierarchyColumn T="Project" />
+                <PropertyColumn Property="x => x.Name" Title="Name" />
+                <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name" />
+                <TemplateColumn Title="Base URL">
+                  <CellTemplate>
+                    <MudText>@context.Item.ServiceBaseUrl(baseUrl)</MudText>
+                  </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn CellClass="d-flex justify-end">
+                  <CellTemplate>
+                    <MudTooltip Text="Delete this project">
+                      <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item))" />
+                    </MudTooltip>
+                  </CellTemplate>
+                </TemplateColumn>
+              </Columns>
+              <ChildRowContent>
+                <DataContainer HasData="context.Item.RequestResponses is not null && context.Item.RequestResponses.Any()">
+                  <DataTemplate>
+                    @foreach (RequestResponsePair rrpair in context.Item.RequestResponses!)
+                    {
+                      <MudCard Class="px-2 py-2 pl-2 pr-2">
+                        <MudCardHeader>
+                          <CardHeaderAvatar>
+                            <MudChip Color="@GetColor(rrpair.Request.Summary.Method)">@rrpair.Request.Summary.Method</MudChip>
+                            <MudChip Color="Color.Primary">@rrpair.Response.Summary.Status.ToString()</MudChip>
+                          </CardHeaderAvatar>
+                          <CardHeaderContent>
+                            <MudText Typo="Typo.subtitle1">@rrpair.Name</MudText>
+                            <MudText Typo="Typo.subtitle2" Class="ml-2 pr-2">@rrpair.Request.Summary.Path</MudText>
+                          </CardHeaderContent>
+                          <CardHeaderActions>
+                            <MudTooltip Text="Copy the URL to the clipboard.">
+                              <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Default" OnClick="@(() => CopyUrlToClipboard(context.Item, rrpair))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Clone this request/response">
+                              <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.PlusOne" Color="Color.Default" OnClick="@(() => Clone(context.Item, rrpair))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Delete this request/response">
+                              <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => Delete(context.Item, rrpair))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Edit this request/response">
+                              <MudIconButton Disabled="submitting" Icon="@Icons.Material.Filled.Edit" Color="Color.Default" OnClick="@(() => NavigateToUpload(context.Item, true, rrpair))" />
+                            </MudTooltip>
+                          </CardHeaderActions>
+                        </MudCardHeader>
+                        <MudText Typo="Typo.body2">@rrpair.Description</MudText>
+                      </MudCard>
+                    }
+                  </DataTemplate>
+                </DataContainer>
+                <MudButton Disabled="submitting" OnClick="@(() => NavigateToUpload(context.Item, false))" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Request/Response</MudButton>
+              </ChildRowContent>
+            </MudDataGrid>
+          </DataTemplate>
+        </DataContainer>
+        <MudButton Disabled="submitting" Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Project</MudButton>
       </DataTemplate>
     </DataContainer>
-    <MudButton Disabled="submitting" Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Project</MudButton>
   </Loaded>
 </Loading>
 
@@ -106,7 +111,7 @@
   private bool submitting;
   private bool loading = true;
   private string infoMessage = "";
-  private List<Organization>? organizations;
+
   static Color GetColor(string methodName) => 
     methodName switch
     {
@@ -121,6 +126,7 @@
 
   protected override async Task OnInitializedAsync()
   {
+    Organization.PropertyChanged += OrganizationOnPropertyChanged;
     try
     {
       baseUrl = Configuration.GetValue<string>("Server:BaseAddress")!;
@@ -129,12 +135,20 @@
         baseUrl += "/";
       }
       ProjectProps.Clear();
-      projects = await ProjectApi.GetProjects("goldlight");
+      if (Organization.SelectedOrganization is not null)
+      {
+        projects = await ProjectApi.GetProjects(Organization.SelectedOrganization!.FriendlyName);
+      }
     }
     finally
     {
       loading = false;
     }
+  }
+
+  private void OrganizationOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+  {
+    StateHasChanged();
   }
 
   private void NavigateToUpload(Project project, bool edit, RequestResponsePair? requestResponsePair = null)
@@ -186,4 +200,10 @@
     }
     submitting = false;
   }
+
+  public void Dispose()
+  {
+    Organization.PropertyChanged -= OrganizationOnPropertyChanged;
+  }
+
 }

@@ -1,6 +1,38 @@
-﻿<MudNavMenu>
+﻿@inject OrganizationProps OrganizationProps
+@using System.ComponentModel
+@implements IDisposable
+<DataContainer HasData="@(OrganizationProps.SelectedOrganization is not null)">
+  <DataTemplate>
+    <MudForm>
+      <MudSelect Dense="true" T="Organization" @bind-Value="OrganizationProps.SelectedOrganization" Label="Organizations">
+        @foreach (var organization in OrganizationProps.Organizations)
+        {
+          <MudSelectItem Value="organization">@organization.FriendlyName</MudSelectItem>
+        }
+      </MudSelect>
+    </MudForm>
+  </DataTemplate>
+</DataContainer>
+<MudNavMenu>
   <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
   <MudNavGroup Title="Settings" Icon="@Icons.Material.Filled.Settings">
     <MudNavLink Href="settings/organization" Match="NavLinkMatch.All">Organization</MudNavLink>
   </MudNavGroup>
 </MudNavMenu>
+@code
+{
+  protected override void OnInitialized()
+  {
+    OrganizationProps.PropertyChanged += OrganizationPropsOnPropertyChanged;
+  }
+
+  public void Dispose()
+  {
+    OrganizationProps.PropertyChanged -= OrganizationPropsOnPropertyChanged;
+  }
+
+  private void OrganizationPropsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+  {
+    StateHasChanged();
+  }
+}
