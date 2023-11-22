@@ -4,13 +4,13 @@
 @inject NavigationManager NavigationManager
 @inject OrganizationProps OrganizationProps
 
-<MudThemeProvider />
-<MudDialogProvider />
-<MudSnackbarProvider />
+<MudThemeProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
 
 <MudLayout>
   <MudAppBar Elevation="0" Dense="true">
-    <MudIconButton Color="Color.Inherit" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu" OnClick="@(e => DrawerToggle())" />
+    <MudIconButton Color="Color.Inherit" Edge="Edge.Start" Icon="@Icons.Material.Filled.Menu" OnClick="@(e => DrawerToggle())"/>
     <MudSpacer/>
     <MudMenu AnchorOrigin="Origin.BottomCenter" Color="Color.Inherit" Dense Icon="@Icons.Material.Filled.MoreVert">
       <AuthorizeView>
@@ -34,8 +34,6 @@
 </MudLayout>
 
 @code {
-  [CascadingParameter]
-  private Task<AuthenticationState> AuthenticationState { get; set; } = null!;
   bool drawerOpen = true;
 
   protected override async Task OnInitializedAsync()

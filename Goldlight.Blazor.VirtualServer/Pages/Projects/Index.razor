@@ -13,7 +13,6 @@
 
 <PageTitle>Projects</PageTitle>
 @attribute [Authorize]
-
 <DataContainer HasData="!string.IsNullOrWhiteSpace(infoMessage)">
   <DataTemplate>
     <MudAlert Severity="Severity.Success" ContentAlignment="HorizontalAlignment.Center" Variant="Variant.Filled" ShowCloseIcon="true" CloseIconClicked="()=>infoMessage = string.Empty">@infoMessage</MudAlert>
@@ -27,7 +26,7 @@
         <MudButton Href="/organizations/addorganization" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Organization</MudButton>
       </NoData>
       <DataTemplate>
-        <DataContainer HasData="@(projects is not null)">
+        <DataContainer HasData="@(projects is not null && projects.Any())">
           <NoData>
             <MudText Typo="Typo.caption">No projects are present</MudText>
           </NoData>
@@ -45,7 +44,7 @@
                 <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name" />
                 <TemplateColumn Title="Base URL">
                   <CellTemplate>
-                    <MudText>@context.Item.ServiceBaseUrl(baseUrl)</MudText>
+                    <MudText>@context.Item.ServiceBaseUrl(baseUrl, Organization)</MudText>
                   </CellTemplate>
                 </TemplateColumn>
                 <TemplateColumn CellClass="d-flex justify-end">
@@ -137,7 +136,7 @@
       ProjectProps.Clear();
       if (Organization.SelectedOrganization is not null)
       {
-        projects = await ProjectApi.GetProjects(Organization.SelectedOrganization!.FriendlyName);
+        projects = await ProjectApi.GetProjects(Organization.SelectedOrganization!.Id);
       }
     }
     finally
@@ -148,6 +147,14 @@
 
   private void OrganizationOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
+    if (e.PropertyName == nameof(OrganizationProps.SelectedOrganization))
+    {
+      Task.Run(async () =>
+      {
+        projects = await ProjectApi.GetProjects(Organization.SelectedOrganization!.Id);
+        StateHasChanged();
+      });
+    }
     StateHasChanged();
   }
 
@@ -159,7 +166,7 @@
 
   private async Task CopyUrlToClipboard(Project project, RequestResponsePair rrpair)
   {
-    string endpoint = $"{project.ServiceBaseUrl(baseUrl)}{rrpair.UrlFriendlyPath()}";
+    string endpoint = $"{project.ServiceBaseUrl(baseUrl, Organization)}{rrpair.UrlFriendlyPath()}";
     await Clipboard.CopyToClipboard(endpoint);
     infoMessage = $"{endpoint} copied to clipboard";
   }

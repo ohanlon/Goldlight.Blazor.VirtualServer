@@ -1,11 +1,13 @@
 ﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using Microsoft.Extensions.Options
 
 @inject NavigationManager NavigationManager
+@inject IOptionsSnapshot<RemoteAuthenticationOptions<ApiAuthorizationProviderOptions>> OptionsSnapshot
 
 @code {
 
   protected override void OnInitialized()
   {
-    NavigationManager.NavigateToLogin("authentication/login");
+    NavigationManager.NavigateToLogin(OptionsSnapshot.Get(Options.DefaultName).AuthenticationPaths.LogInPath);
   }
 }

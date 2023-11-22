@@ -2,6 +2,7 @@
 @inject NavigationManager NavigationManager
 @inject ProjectApi ProjectApi
 @inject IDialogService DialogService
+@inject OrganizationProps OrganizationProps
 
 <PageTitle>Add Project</PageTitle>
 
@@ -24,6 +25,7 @@
 
   private async Task OnValidSubmit(EditContext context)
   {
+    project.Organization = OrganizationProps.SelectedOrganization!.Id;
     submitted = true;
     bool? result = await DialogService.ShowMessageBox("Warning",
       "The friendly name cannot be changed once you have saved this record. Are you sure you want to continue saving?", yesText: "Yes", cancelText: "Cancel");

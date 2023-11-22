@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using Goldlight.Blazor.VirtualServer.Models;
 using Goldlight.Blazor.VirtualServer.Models.RequestResponse;
+using Goldlight.Blazor.VirtualServer.State;
 
 namespace Goldlight.Blazor.VirtualServer.Extensions;
 
@@ -53,8 +54,8 @@ public static class ModelExtensions
   public static string UrlFriendlyPath(this RequestResponsePair pair) =>
     pair.Request.Summary.Path!.StartsWith("/") ? pair.Request.Summary.Path : $"/{pair.Request.Summary.Path}";
 
-  public static string ServiceBaseUrl(this Project project, string baseUrl) =>
+  public static string ServiceBaseUrl(this Project project, string baseUrl, OrganizationProps props) =>
     baseUrl.EndsWith("/")
-      ? $"{baseUrl}{project.Organization}/{project.FriendlyName}"
-      : $"{baseUrl}/{project.Organization}/{project.FriendlyName}";
+      ? $"{baseUrl}{props.SelectedOrganization!.FriendlyName}/{project.FriendlyName}"
+      : $"{baseUrl}/{props.SelectedOrganization!.FriendlyName}/{project.FriendlyName}";
 }

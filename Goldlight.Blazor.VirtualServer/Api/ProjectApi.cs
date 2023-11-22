@@ -13,7 +13,7 @@ public class ProjectApi
     this.httpClient = httpClient;
   }
 
-  public async Task<ObservableCollection<Project>?> GetProjects(string organization) => 
+  public async Task<ObservableCollection<Project>?> GetProjects(Guid organization) =>
     await httpClient.Get<ObservableCollection<Project>>($"api/{organization}/projects");
 
   public async Task<Project?> GetProject(string id) =>
