@@ -8,9 +8,9 @@ namespace Goldlight.Blazor.VirtualServer.Models;
 public class Organization
 {
   private string name = null!;
-  [DataMember(Name = "id")] public Guid Id { get; set; } = Guid.Empty;
+  [DataMember(Name = "id")] public Guid Id { get; set; }
 
-  [DataMember(Name = "name"), MaxLength(120), Required]
+  [DataMember(Name = "name"), MinLength(1), MaxLength(120), Required]
   public string Name
   {
     get => name;
@@ -21,10 +21,11 @@ public class Organization
     }
   }
 
-  [DataMember(Name = "friendlyname"), MaxLength(360), Required]
+  [DataMember(Name = "friendlyname"), MinLength(1), MaxLength(360), Required]
   public string FriendlyName { get; set; } = null!;
 
   [DataMember(Name = "version")] public long Version { get; set; }
 
-  [DataMember(Name = "api-key")] public string ApiKey { get; set; }
+  [DataMember(Name = "api-key"), MinLength(1), MaxLength(32)]
+  public string ApiKey { get; set; }
 }

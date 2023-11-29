@@ -6,6 +6,12 @@ namespace Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 [DataContract]
 public class HttpResponseSummary
 {
-  [DataMember(Name="protocol"), Required] public string? Protocol { get; set; }
-  [DataMember(Name = "status"), Required] public int? Status { get; set; }
+  [DataMember(Name = "responsesummaryid")]
+  public Guid Id { get; set; }
+
+  [DataMember(Name = "protocol"), Required, MinLength(1), MaxLength(32)]
+  public string? Protocol { get; set; }
+
+  [DataMember(Name = "status"), Required]
+  public int? Status { get; set; }
 }

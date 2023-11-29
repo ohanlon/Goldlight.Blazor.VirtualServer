@@ -7,6 +7,8 @@ namespace Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 [DataContract]
 public class Request
 {
+  [DataMember(Name = "requestid")] public Guid Id { get; set; }
+
   [Required, DataMember(Name = "summary")]
   public HttpRequestSummary Summary { get; set; } = new();
 

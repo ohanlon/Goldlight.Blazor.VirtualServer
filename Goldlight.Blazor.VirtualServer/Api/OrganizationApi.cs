@@ -1,5 +1,4 @@
-﻿using System.Collections.ObjectModel;
-using Goldlight.Blazor.VirtualServer.Extensions;
+﻿using Goldlight.Blazor.VirtualServer.Extensions;
 using Goldlight.Blazor.VirtualServer.Models;
 
 namespace Goldlight.Blazor.VirtualServer.Api;

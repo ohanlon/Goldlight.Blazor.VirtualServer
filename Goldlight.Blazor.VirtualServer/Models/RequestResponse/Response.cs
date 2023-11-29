@@ -7,10 +7,12 @@ namespace Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 [DataContract]
 public class Response
 {
-  [Required, DataMember(Name = "summary")] public HttpResponseSummary Summary { get; set; } = new();
-  [DataMember(Name = "headers")]
-  public ObservableCollection<HttpHeader> Headers { get; set; } = new();
+  [DataMember(Name = "responseid")] public Guid Id { get; set; }
 
-  [DataMember(Name = "content")]
-  public string? Content { get; set; }
+  [Required, DataMember(Name = "summary")]
+  public HttpResponseSummary Summary { get; set; } = new();
+
+  [DataMember(Name = "headers")] public ObservableCollection<HttpHeader> Headers { get; set; } = new();
+
+  [DataMember(Name = "content")] public string? Content { get; set; }
 }

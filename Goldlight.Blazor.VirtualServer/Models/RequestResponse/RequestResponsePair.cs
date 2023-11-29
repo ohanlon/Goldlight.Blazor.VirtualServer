@@ -6,8 +6,20 @@ namespace Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 [DataContract]
 public class RequestResponsePair
 {
-  [DataMember(Name = "name")] public string? Name { get; set; }
-  [DataMember(Name = "description")] public string? Description { get; set; }
-  [Required, DataMember(Name="request")] public Request Request { get; set; } = new();
-  [Required, DataMember(Name="response")] public Response Response { get; set; } = new();
+  [DataMember(Name = "id")] public Guid Id { get; set; }
+  [DataMember(Name = "projectId")] public Guid ProjectId { get; set; }
+
+  [Required, DataMember(Name = "name"), MinLength(10), MaxLength(120)]
+  public string Name { get; set; } = null!;
+
+  [Required, DataMember(Name = "description"), MinLength(10), MaxLength(500)]
+  public string Description { get; set; } = null!;
+
+  [Required, DataMember(Name = "request")]
+  public Request Request { get; set; } = new();
+
+  [Required, DataMember(Name = "response")]
+  public Response Response { get; set; } = new();
+
+  [DataMember(Name = "version")] public long Version { get; set; }
 }

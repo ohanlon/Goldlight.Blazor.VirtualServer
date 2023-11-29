@@ -8,15 +8,15 @@ namespace Goldlight.Blazor.VirtualServer.Models;
 [DataContract]
 public class Project
 {
-  [DataMember(Name = "id")] public Guid Id { get; set; } = Guid.Empty;
+  [DataMember(Name = "id")] public Guid Id { get; set; }
 
   [Required, DataMember(Name = "organization")]
   public Guid Organization { get; set; } = Guid.Empty;
 
-  [Required, DataMember(Name = "name"), MaxLength(120)]
+  [Required, DataMember(Name = "name"), MinLength(1), MaxLength(120)]
   public string Name { get; set; } = null!;
 
-  [Required, DataMember(Name = "friendlyname"), MaxLength(120)]
+  [Required, DataMember(Name = "friendlyname"), MinLength(1), MaxLength(120)]
   public string FriendlyName { get; set; } = null!;
 
   [Required, DataMember(Name = "description")]

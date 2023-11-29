@@ -1,5 +1,4 @@
 ﻿@page "/rrpair/upload"
-@using System.Collections.ObjectModel
 
 @using Goldlight.Blazor.VirtualServer.Pages.RequestResponsePairs.Validator
 
@@ -114,6 +113,7 @@
     ProjectProps.SelectedProject!.RequestResponses ??= new List<RequestResponsePair>();
     if (!Edit)
     {
+      requestResponsePair.ProjectId = ProjectProps.SelectedProject!.Id;
       ProjectProps.SelectedProject.RequestResponses.Add(requestResponsePair);
     }
     else
@@ -138,7 +138,7 @@
     await form.Validate();
     if (form.IsValid)
     {
-      await ProjectApi.UpdateProject(ProjectProps.SelectedProject!);
+      await ProjectApi.SaveRequestResponse(ProjectProps.SelectedProject!.Id, requestResponsePair);
       ProjectProps.Clear();
       NavigationManager.NavigateTo("/");
     }

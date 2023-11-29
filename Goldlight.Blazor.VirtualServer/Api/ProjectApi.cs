@@ -1,6 +1,7 @@
 ﻿using Goldlight.Blazor.VirtualServer.Extensions;
 using Goldlight.Blazor.VirtualServer.Models;
 using System.Collections.ObjectModel;
+using Goldlight.Blazor.VirtualServer.Models.RequestResponse;
 
 namespace Goldlight.Blazor.VirtualServer.Api;
 
@@ -23,8 +24,11 @@ public class ProjectApi
     await httpClient.Post("api/project", project);
 
   public async Task<Project?> UpdateProject(Project project) =>
-    await httpClient.Put("/api/project", project);
+    await httpClient.Put("api/project", project);
 
   public async Task DeleteProject(string id) =>
     await httpClient.Delete<string>($"api/project/{id}");
+
+  public async Task<RequestResponsePair?> SaveRequestResponse(Guid projectId, RequestResponsePair rrpair) =>
+    await httpClient.Post($"api/{projectId}/rrpair", rrpair);
 }
