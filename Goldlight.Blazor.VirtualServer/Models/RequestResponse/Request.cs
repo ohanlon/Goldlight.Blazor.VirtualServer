@@ -14,5 +14,5 @@ public class Request
 
   [DataMember(Name = "headers")] public ObservableCollection<HttpHeader> Headers { get; set; } = new();
 
-  [DataMember(Name = "content")] public string? Content { get; set; }
+  [DataMember(Name = "requestcontent")] public string? Content { get; set; }
 }

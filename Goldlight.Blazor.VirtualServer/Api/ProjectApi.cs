@@ -17,6 +17,9 @@ public class ProjectApi
   public async Task<ObservableCollection<Project>?> GetProjects(Guid organization) =>
     await httpClient.Get<ObservableCollection<Project>>($"api/{organization}/projects");
 
+  public async Task<ObservableCollection<RequestResponsePair>?> GetAll(Guid organization, Guid project) =>
+    await httpClient.Get<ObservableCollection<RequestResponsePair>>($"/api/{organization}/project/{project}/pairs");
+
   public async Task<Project?> GetProject(string id) =>
     await httpClient.Get<Project>($"api/project/{id}");
 

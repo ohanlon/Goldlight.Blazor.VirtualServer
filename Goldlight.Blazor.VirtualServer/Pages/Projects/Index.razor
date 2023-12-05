@@ -137,11 +137,33 @@
       if (Organization.SelectedOrganization is not null)
       {
         projects = await ProjectApi.GetProjects(Organization.SelectedOrganization!.Id);
+        await LoadRequestResponsePairs();
       }
     }
     finally
     {
       loading = false;
+    }
+  }
+
+  private async Task LoadRequestResponsePairs()
+  {
+    if (Organization.SelectedOrganization is null)
+    {
+      return;
+    }
+    foreach (Project project in projects)
+    {
+      try
+      {
+        var response = await ProjectApi.GetAll(Organization!.SelectedOrganization!.Id, project.Id);
+        project.RequestResponses = response!;
+      }
+      catch (Exception e)
+      {
+        Console.WriteLine(e);
+        throw;
+      }
     }
   }
 
@@ -152,6 +174,7 @@
       Task.Run(async () =>
       {
         projects = await ProjectApi.GetProjects(Organization.SelectedOrganization!.Id);
+        await LoadRequestResponsePairs();
         StateHasChanged();
       });
     }

@@ -9,19 +9,8 @@ public static class ModelExtensions
 {
   public static RequestResponsePair Clone(this RequestResponsePair pair)
   {
-    ObservableCollection<HttpHeader> requestHeaders = new();
-    foreach (HttpHeader hdr in pair.Request.Headers)
-    {
-      HttpHeader header = new() { Name = hdr.Name, Value = hdr.Value };
-      requestHeaders.Add(header);
-    }
-
-    ObservableCollection<HttpHeader> responseHeaders = new();
-    foreach (HttpHeader hdr in pair.Response.Headers)
-    {
-      HttpHeader header = new() { Name = hdr.Name, Value = hdr.Value };
-      responseHeaders.Add(header);
-    }
+    ObservableCollection<HttpHeader> requestHeaders = CloneHeaders(pair.Request.Headers);
+    ObservableCollection<HttpHeader> responseHeaders = CloneHeaders(pair.Response.Headers);
 
     return new RequestResponsePair
     {
@@ -58,4 +47,21 @@ public static class ModelExtensions
     baseUrl.EndsWith("/")
       ? $"{baseUrl}{props.SelectedOrganization!.FriendlyName}/{project.FriendlyName}"
       : $"{baseUrl}/{props.SelectedOrganization!.FriendlyName}/{project.FriendlyName}";
+
+  private static ObservableCollection<HttpHeader> CloneHeaders(ObservableCollection<HttpHeader>? headers)
+  {
+    ObservableCollection<HttpHeader> copyHeaders = new();
+    if (headers is null)
+    {
+      return copyHeaders;
+    }
+
+    foreach (HttpHeader hdr in headers)
+    {
+      HttpHeader header = new() { Name = hdr.Name, Value = hdr.Value };
+      copyHeaders.Add(header);
+    }
+
+    return copyHeaders;
+  }
 }

@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Runtime.Serialization;
 using Goldlight.Blazor.VirtualServer.Models.RequestResponse;
@@ -10,7 +11,7 @@ public class Project
 {
   [DataMember(Name = "id")] public Guid Id { get; set; }
 
-  [Required, DataMember(Name = "organization")]
+  [Required, DataMember(Name = "organization_id")]
   public Guid Organization { get; set; } = Guid.Empty;
 
   [Required, DataMember(Name = "name"), MinLength(1), MaxLength(120)]
@@ -22,10 +23,8 @@ public class Project
   [Required, DataMember(Name = "description")]
   public string? Description { get; set; }
 
-  [DataMember(Name = "version")] public long Version { get; set; }
+  [Required, DataMember(Name = "version")]
+  public long Version { get; set; }
 
-  [DataMember(Name = "requestResponses")]
-  public List<RequestResponsePair>? RequestResponses { get; set; }
-
-  public string UrlName => FriendlyName is not null ? WebUtility.UrlEncode(FriendlyName.ToLowerInvariant()) : "";
+  public ObservableCollection<RequestResponsePair>? RequestResponses { get; set; }
 }

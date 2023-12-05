@@ -110,7 +110,7 @@
     {
       NavigationManager.NavigateTo("/");
     }
-    ProjectProps.SelectedProject!.RequestResponses ??= new List<RequestResponsePair>();
+    ProjectProps.SelectedProject!.RequestResponses ??= new ObservableCollection<RequestResponsePair>();
     if (!Edit)
     {
       requestResponsePair.ProjectId = ProjectProps.SelectedProject!.Id;
