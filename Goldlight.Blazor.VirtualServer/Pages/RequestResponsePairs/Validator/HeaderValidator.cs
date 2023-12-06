@@ -7,7 +7,7 @@ public class HeaderValidator : AbstractValidator<HttpHeader>
 {
   public HeaderValidator()
   {
-    RuleFor(hdr => hdr.Name).NotEmpty();
+    RuleFor(hdr => hdr.Key).NotEmpty();
     RuleFor(hdr => hdr.Value).NotEmpty();
   }
 }

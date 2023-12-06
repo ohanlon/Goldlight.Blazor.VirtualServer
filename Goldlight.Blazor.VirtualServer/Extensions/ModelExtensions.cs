@@ -7,19 +7,17 @@ namespace Goldlight.Blazor.VirtualServer.Extensions;
 
 public static class ModelExtensions
 {
-  public static RequestResponsePair Clone(this RequestResponsePair pair)
-  {
-    ObservableCollection<HttpHeader> requestHeaders = CloneHeaders(pair.Request.Headers);
-    ObservableCollection<HttpHeader> responseHeaders = CloneHeaders(pair.Response.Headers);
-
-    return new RequestResponsePair
+  public static RequestResponsePair Clone(this RequestResponsePair pair) =>
+    new()
     {
       Name = $"[CLONE] {pair.Name}",
       Description = pair.Description,
+      ProjectId = pair.ProjectId,
+      Version = 0,
       Request = new Request
       {
         Content = pair.Request.Content,
-        Headers = requestHeaders,
+        Headers = CloneHeaders(pair.Request.Headers),
         Summary = new HttpRequestSummary
         {
           Method = pair.Request.Summary.Method,
@@ -30,7 +28,7 @@ public static class ModelExtensions
       Response = new Response()
       {
         Content = pair.Response.Content,
-        Headers = responseHeaders,
+        Headers = CloneHeaders(pair.Response.Headers),
         Summary = new HttpResponseSummary
         {
           Status = pair.Response.Summary.Status,
@@ -38,7 +36,6 @@ public static class ModelExtensions
         }
       }
     };
-  }
 
   public static string UrlFriendlyPath(this RequestResponsePair pair) =>
     pair.Request.Summary.Path!.StartsWith("/") ? pair.Request.Summary.Path : $"/{pair.Request.Summary.Path}";
@@ -58,7 +55,7 @@ public static class ModelExtensions
 
     foreach (HttpHeader hdr in headers)
     {
-      HttpHeader header = new() { Name = hdr.Name, Value = hdr.Value };
+      HttpHeader header = new() { Key = hdr.Key, Value = hdr.Value };
       copyHeaders.Add(header);
     }
 

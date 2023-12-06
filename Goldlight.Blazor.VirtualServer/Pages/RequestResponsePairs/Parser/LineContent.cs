@@ -35,7 +35,7 @@ public abstract class LineContent<T>
     HttpHeader header = new();
     var match = Regex.Match(requestLine.Trim(), @"(?<name>[\w\-]+):\s+(?<value>.*)");
     {
-      header.Name = match.Groups["name"].Value;
+      header.Key = match.Groups["name"].Value;
       header.Value = match.Groups["value"].Value;
     }
     return header;

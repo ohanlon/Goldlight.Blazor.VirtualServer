@@ -40,7 +40,7 @@
               </ToolBarContent>
               <Columns>
                 <HierarchyColumn T="Project" />
-                <PropertyColumn Property="x => x.Name" Title="Name" />
+                <PropertyColumn Property="x => x.Name" Title="Key" />
                 <PropertyColumn Property="x => x.FriendlyName" Title="Friendly name" />
                 <TemplateColumn Title="Base URL">
                   <CellTemplate>
@@ -212,7 +212,7 @@
     if (result.HasValue && result.Value)
     {
       projects!.Remove(project);
-      await ProjectApi.DeleteProject(project.Id.ToString());
+      await ProjectApi.DeleteProject(project);
     }
     submitting = false;
   }

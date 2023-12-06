@@ -29,9 +29,10 @@ public class ProjectApi
   public async Task<Project?> UpdateProject(Project project) =>
     await httpClient.Put("api/project", project);
 
-  public async Task DeleteProject(string id) =>
-    await httpClient.Delete<string>($"api/project/{id}");
+  public async Task DeleteProject(Project project) =>
+    await httpClient.Delete<string>($"api/{project.Organization}/project/{project.Id}");
 
-  public async Task<RequestResponsePair?> SaveRequestResponse(Guid projectId, RequestResponsePair rrpair) =>
-    await httpClient.Post($"api/{projectId}/rrpair", rrpair);
+  public async Task<RequestResponsePair?> SaveRequestResponse(Guid organization, Guid projectId,
+    RequestResponsePair rrpair) =>
+    await httpClient.Post($"api/{organization}/project/{projectId}/rrpair", rrpair);
 }
