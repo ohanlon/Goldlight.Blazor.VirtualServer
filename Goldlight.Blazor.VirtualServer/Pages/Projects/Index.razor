@@ -225,8 +225,7 @@
     if (result.HasValue && result.Value)
     {
       project.RequestResponses!.Remove(rrpair);
-      var updatedProject = await ProjectApi.UpdateProject(project);
-      project.Version = updatedProject!.Version;
+      await ProjectApi.DeleteRequestResponse(project, rrpair);
     }
     submitting = false;
   }

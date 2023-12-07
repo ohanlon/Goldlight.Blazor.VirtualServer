@@ -1,35 +1,42 @@
 ﻿@page "/settings/organization"
+@using System.ComponentModel
 
-@inject OrganizationApi OrganizationApi
-
+@inject OrganizationProps Organization
+@implements IDisposable
 <PageTitle>Organization Settings</PageTitle>
 @attribute [Authorize]
 
-<Loading IsLoading="loading">
-  <Loaded>
-    <DataContainer HasData="@(organization is not null)">
-      <NoData>
-        <MudText>No organization details present</MudText>
-        <MudButton Href="/organizations/addorganization" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Organization</MudButton>
-      </NoData>
-      <DataTemplate>
-        <MudText Typo="Typo.h3">Organization details</MudText>
-        <MudText Typo="Typo.subtitle1">Key:</MudText>
-        <MudText>@organization!.Name</MudText>
-        <MudText Typo="Typo.h3">API</MudText>
-        <MudText Typo="Typo.subtitle1">API Key:</MudText>
-        <MudText>@organization!.ApiKey</MudText>
-      </DataTemplate>
-    </DataContainer>
-  </Loaded>
-</Loading>
+<DataContainer HasData="@(organization is not null)">
+  <NoData>
+    <MudText>No organization details present</MudText>
+    <MudButton Href="/organizations/addorganization" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Organization</MudButton>
+  </NoData>
+  <DataTemplate>
+    <MudText Typo="Typo.h3">Organization details</MudText>
+    <MudText Typo="Typo.subtitle1">Key:</MudText>
+    <MudText>@organization!.Name</MudText>
+    <MudText Typo="Typo.h3">API</MudText>
+    <MudText Typo="Typo.subtitle1">API Key:</MudText>
+    <MudText>@organization!.ApiKey</MudText>
+  </DataTemplate>
+</DataContainer>
 
 @code {
   private Organization? organization;
-  private bool loading = true;
-  protected override async Task OnInitializedAsync()
+
+  protected override void OnInitialized()
   {
-    organization = await OrganizationApi.GetOrganizationAsync("goldlight");
-    loading = false;
+    Organization.PropertyChanged += OrganizationOnPropertyChanged;
+    organization = Organization.SelectedOrganization;
+  }
+
+  private void OrganizationOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
+  {
+    organization = Organization.SelectedOrganization;
+  }
+
+  public void Dispose()
+  {
+    Organization.PropertyChanged -= OrganizationOnPropertyChanged;
   }
 }
