@@ -1,7 +1,13 @@
-﻿namespace Goldlight.Blazor.VirtualServer.Extensions;
+﻿using Goldlight.Blazor.VirtualServer.Services;
+using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Microsoft.Extensions.Options;
+
+namespace Goldlight.Blazor.VirtualServer.Extensions;
 
 public class ResponseHandler
 {
+  private readonly NavigationManagement navigationManagement;
   private Action? createdAction;
   private Action? okAction;
   private Action? notFoundAction;
@@ -9,6 +15,11 @@ public class ResponseHandler
   private Action? conflictAction;
   private Action? unauthorizedAction;
   private Action? forbiddenAction;
+
+  public ResponseHandler(NavigationManagement navigationManagement)
+  {
+    this.navigationManagement = navigationManagement;
+  }
 
   public ResponseHandler Forbidden(Action? action)
   {
@@ -57,6 +68,17 @@ public class ResponseHandler
   public void ServerFailure() => serverFailureAction?.Invoke();
   public void Created() => createdAction?.Invoke();
   public void Conflict() => conflictAction?.Invoke();
-  public void Forbidden() => forbiddenAction?.Invoke();
+
+  public void Forbidden()
+  {
+    if (forbiddenAction is not null)
+    {
+      forbiddenAction.Invoke();
+      return;
+    }
+
+    navigationManagement.Login();
+  }
+
   public void Unauthorized() => unauthorizedAction?.Invoke();
 }

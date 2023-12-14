@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/projects"
 
 @inject OrganizationProps Organization
 @inject ProjectApi ProjectApi
@@ -148,7 +148,7 @@
 
   private async Task LoadRequestResponsePairs()
   {
-    if (Organization.SelectedOrganization is null)
+    if (Organization.SelectedOrganization is null || projects is null)
     {
       return;
     }

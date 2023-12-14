@@ -1,8 +1,10 @@
-﻿@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
-
-@inherits LayoutComponentBase
-@inject NavigationManager NavigationManager
+﻿@inherits LayoutComponentBase
 @inject OrganizationProps OrganizationProps
+@inject ILogger<MainLayout> Logger
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManagement NavigationManagement
+
+@implements IDisposable
 
 <MudThemeProvider/>
 <MudDialogProvider/>
@@ -38,7 +40,24 @@
 
   protected override async Task OnInitializedAsync()
   {
-    await OrganizationProps.LoadOrganizationsAsync();
+    AuthenticationStateProvider.AuthenticationStateChanged += AuthenticationStateProviderOnAuthenticationStateChanged;
+    var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    await LoadOrganizationsAsync(authState);
+  }
+
+  private async void AuthenticationStateProviderOnAuthenticationStateChanged(Task<AuthenticationState> task)
+  {
+    AuthenticationState state = await (task);
+    await LoadOrganizationsAsync(state);
+  }
+
+  private async Task LoadOrganizationsAsync(AuthenticationState state)
+  {
+    if (state.User.Identity is { IsAuthenticated: true })
+    {
+      Logger.LogInformation("Loading the organization");
+      await OrganizationProps.LoadOrganizationsAsync();
+    }
   }
 
   private void DrawerToggle()
@@ -48,7 +67,12 @@
 
   private void Logout()
   {
-    NavigationManager.NavigateToLogout("authentication/logout");
+    NavigationManagement.Logout();
+  }
+
+  public void Dispose()
+  {
+    AuthenticationStateProvider.AuthenticationStateChanged -= AuthenticationStateProviderOnAuthenticationStateChanged;
   }
 
 }

@@ -1,7 +1,9 @@
 ﻿@page "/settings/organization"
 @using System.ComponentModel
 
+@inject AuthenticationStateProvider AuthenticationStateProvider
 @inject OrganizationProps Organization
+@inject OrganizationApi OrganizationApi
 @implements IDisposable
 <PageTitle>Organization Settings</PageTitle>
 @attribute [Authorize]
@@ -12,27 +14,66 @@
     <MudButton Href="/organizations/addorganization" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Organization</MudButton>
   </NoData>
   <DataTemplate>
-    <MudText Typo="Typo.h3">Organization details</MudText>
-    <MudText Typo="Typo.subtitle1">Key:</MudText>
-    <MudText>@organization!.Name</MudText>
-    <MudText Typo="Typo.h3">API</MudText>
-    <MudText Typo="Typo.subtitle1">API Key:</MudText>
-    <MudText>@organization!.ApiKey</MudText>
-  </DataTemplate>
-</DataContainer>
+    <MudText Typo="Typo.subtitle1">Organization details</MudText>
+    <MudText Typo="Typo.subtitle2"><emphasis>Organization name:</emphasis> @organization!.Name</MudText>
+    <MudText Typo="Typo.subtitle2">Friendly name: @organization!.FriendlyName</MudText>
+    <MudText Typo="Typo.subtitle2">API Key: @organization!.ApiKey</MudText>
+    <MudForm Model="members">
+      <MudExpansionPanels Dense Class="mt-0" Elevation="0">
+         <MudExpansionPanel Dense Class="mt-0 pl=0" Text="Members" @bind-IsExpanded="membersExpanded">
+           <MudButton OnClick="@(AddMember)" Variant="Variant.Filled" Color="Color.Success">Add Member</MudButton>
+           <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="OrganizationMember" Items="members">
+             <Columns>
+               <PropertyColumn Property="member => member.EmailAddress" />
+               <TemplateColumn>
+                 <CellTemplate>
+                   <MudText>@context.Item.Role</MudText>
+                 </CellTemplate>
+                 <EditTemplate>
+                   <MudRadioGroup T="string" @bind-SelectedOption="context.Item.Role" Disabled="IsUserThePrimaryUser(context.Item.Role)">
+                     <MudRadio Option="@("PRIMARY OWNER")" Color="Color.Primary" Disabled>Primary Owner</MudRadio>
+                     <MudRadio Option="@("OWNER")" Color="Color.Secondary">Owner</MudRadio>
+                     <MudRadio Option="@("EDITOR")" Color="Color.Tertiary">Editor</MudRadio>
+                     <MudRadio Option="@("SUBSCRIBER")" Color="Color.Default">Subscriber</MudRadio>
+                   </MudRadioGroup>
+                 </EditTemplate>
+               </TemplateColumn>
+             </Columns>
+           </MudDataGrid>
+         </MudExpansionPanel>
+       </MudExpansionPanels>
+     </MudForm>
+   </DataTemplate>
 
-@code {
+ </DataContainer>
+
+ @code {
   private Organization? organization;
+  private bool membersExpanded;
+  private ObservableCollection<OrganizationMember>? members;
 
-  protected override void OnInitialized()
+  private bool IsUserThePrimaryUser(string role) => role == "PRIMARY OWNER";
+
+  protected override async Task OnInitializedAsync()
   {
+    members = await OrganizationApi.GetOrganizationMembers(Organization.SelectedOrganization!);
     Organization.PropertyChanged += OrganizationOnPropertyChanged;
     organization = Organization.SelectedOrganization;
+  }
+
+  private void AddMember()
+  {
+    members?.Add(new());
   }
 
   private void OrganizationOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
     organization = Organization.SelectedOrganization;
+    Task.Run(async () =>
+    {
+      members = await OrganizationApi.GetOrganizationMembers(Organization.SelectedOrganization!);
+      StateHasChanged();
+    });
   }
 
   public void Dispose()

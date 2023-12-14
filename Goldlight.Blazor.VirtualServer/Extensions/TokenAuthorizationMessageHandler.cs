@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using System.Net.Http.Headers;
+using Goldlight.Blazor.VirtualServer.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 
@@ -11,18 +12,14 @@ public class TokenAuthorizationMessageHandler : DelegatingHandler
   private readonly IAccessTokenProvider accessTokenProvider;
   private AuthenticationHeaderValue? cachedAuthenticationHeaderValue;
   private AccessToken? cachedAccessToken;
-  private readonly NavigationManager navigationManager;
-  private readonly IOptionsSnapshot<RemoteAuthenticationOptions<ApiAuthorizationProviderOptions>> optionsSnapshot;
+  private readonly NavigationManagement navigationManagement;
 
   public TokenAuthorizationMessageHandler(IAccessTokenProvider provider,
-    IConfiguration configuration,
-    NavigationManager navigationManager,
-    IOptionsSnapshot<RemoteAuthenticationOptions<ApiAuthorizationProviderOptions>> optionsSnapshot)
+    IConfiguration configuration, NavigationManagement navigationManagement)
   {
     baseUri = new Uri(configuration["Server:BaseAddress"]!);
     accessTokenProvider = provider;
-    this.navigationManager = navigationManager;
-    this.optionsSnapshot = optionsSnapshot;
+    this.navigationManagement = navigationManagement;
   }
 
   protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
@@ -56,7 +53,7 @@ public class TokenAuthorizationMessageHandler : DelegatingHandler
     AccessTokenResult? requestToken = await tokenProvider.RequestAccessToken();
     if (!requestToken.TryGetToken(out AccessToken? token))
     {
-      navigationManager.NavigateToLogin(optionsSnapshot.Get(Options.DefaultName).AuthenticationPaths.LogInPath);
+      navigationManagement.Login();
     }
 
     return token;

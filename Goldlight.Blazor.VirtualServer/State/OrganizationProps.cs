@@ -23,7 +23,7 @@ public class OrganizationProps : INotifyPropertyChanged
 
   public async Task LoadOrganizationsAsync()
   {
-    var organizations = await organizationApi.GetOrganizationsAsync();
+    List<Organization>? organizations = await organizationApi.GetOrganizationsAsync();
     if (organizations is null || !organizations.Any()) return;
     organizations.ForEach(organization => Organizations.Add(organization));
     SelectedOrganization ??= Organizations[0];

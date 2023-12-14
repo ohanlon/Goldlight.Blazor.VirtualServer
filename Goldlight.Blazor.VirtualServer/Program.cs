@@ -5,6 +5,7 @@ using Goldlight.Blazor.VirtualServer.Services;
 using Goldlight.Blazor.VirtualServer.State;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using MudBlazor;
 using MudBlazor.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
@@ -21,7 +22,8 @@ builder.Services.AddScoped<TokenAuthorizationMessageHandler>()
 
 builder.Services.AddMudServices();
 builder.Services.AddScoped<OrganizationApi>().AddScoped<ProjectApi>().AddScoped<ProjectProps>()
-  .AddSingleton<Clipboard>().AddScoped<OrganizationProps>();
+  .AddSingleton<Clipboard>().AddScoped<OrganizationProps>().AddScoped<ResponseHandler>()
+  .AddScoped<NavigationManagement>();
 
 builder.Services.AddOidcAuthentication(options =>
 {
@@ -29,6 +31,19 @@ builder.Services.AddOidcAuthentication(options =>
   options.UserOptions.NameClaim = "preferred_username";
   options.UserOptions.RoleClaim = "roles";
   options.UserOptions.ScopeClaim = "scope";
+});
+
+builder.Services.AddMudServices(config =>
+{
+  config.SnackbarConfiguration.PositionClass = Defaults.Classes.Position.BottomRight;
+
+  config.SnackbarConfiguration.PreventDuplicates = true;
+  config.SnackbarConfiguration.NewestOnTop = true;
+  config.SnackbarConfiguration.ShowCloseIcon = true;
+  config.SnackbarConfiguration.VisibleStateDuration = 3000;
+  config.SnackbarConfiguration.HideTransitionDuration = 200;
+  config.SnackbarConfiguration.ShowTransitionDuration = 200;
+  config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
 });
 
 await builder.Build().RunAsync();
