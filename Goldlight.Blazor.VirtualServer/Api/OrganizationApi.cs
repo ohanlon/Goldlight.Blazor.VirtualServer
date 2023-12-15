@@ -29,7 +29,8 @@ public class OrganizationApi : ApiBase
       responseHandler);
 
   public async Task AddMemberToOrganizationAsync(Guid organization, OrganizationMember member) =>
-    await httpClient.Post<OrganizationMember>($"/organization/{organization}/adduser", member,
+    await httpClient.Post<OrganizationMember>($"api/organization/{organization}/adduser", member,
       responseHandler.NotFound(() =>
-        SnackbarWarning($"Could not add {member.EmailAddress}. Have you checked to make sure they are users?")));
+          SnackbarWarning($"Could not add {member.EmailAddress}. Have you checked to make sure they are users?"))
+        .Ok(() => member.EditEmailAddress = false));
 }

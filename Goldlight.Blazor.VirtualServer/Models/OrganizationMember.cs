@@ -11,4 +11,6 @@ public class OrganizationMember
 
   [DataMember(Name = "rolename"), Required, MaxLength(20)]
   public string Role { get; set; }
+
+  public bool EditEmailAddress { get; set; }
 }
