@@ -63,24 +63,29 @@
 
   protected override async Task OnInitializedAsync()
   {
-    members = await OrganizationApi.GetOrganizationMembers(Organization.SelectedOrganization!);
     Organization.PropertyChanged += OrganizationOnPropertyChanged;
-    organization = Organization.SelectedOrganization;
+    await GetOrganizationMembersForSelectedOrganization();
   }
 
   private void AddMember()
   {
-    members?.Add(new() { EditEmailAddress = true, Role = "SUBSCRIBER" });
+    members?.Add(new OrganizationMember { EditEmailAddress = true, Role = "SUBSCRIBER" });
   }
 
   private void OrganizationOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
-    organization = Organization.SelectedOrganization;
     Task.Run(async () =>
     {
-      members = await OrganizationApi.GetOrganizationMembers(Organization.SelectedOrganization!);
+      await GetOrganizationMembersForSelectedOrganization();
       StateHasChanged();
     });
+  }
+
+  private async Task GetOrganizationMembersForSelectedOrganization()
+  {
+    organization = Organization.SelectedOrganization;
+    if (organization is null) return;
+    members = await OrganizationApi.GetOrganizationMembers(organization!);
   }
 
   public void Dispose()

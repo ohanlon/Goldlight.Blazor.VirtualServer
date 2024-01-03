@@ -11,7 +11,10 @@ public class OrganizationProps : INotifyPropertyChanged
   private readonly OrganizationApi organizationApi;
   private Organization? selectedOrganization;
 
-  public OrganizationProps(OrganizationApi organizationApi) => this.organizationApi = organizationApi;
+  public OrganizationProps(OrganizationApi organizationApi)
+  {
+    this.organizationApi = organizationApi;
+  }
 
   public Organization? SelectedOrganization
   {
@@ -25,7 +28,7 @@ public class OrganizationProps : INotifyPropertyChanged
   {
     List<Organization>? organizations = await organizationApi.GetOrganizationsAsync();
     if (organizations is null || !organizations.Any()) return;
-    organizations.ForEach(organization => Organizations.Add(organization));
+    organizations.ForEach(Organizations.Add);
     SelectedOrganization ??= Organizations[0];
   }
 
