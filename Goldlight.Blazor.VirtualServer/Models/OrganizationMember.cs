@@ -6,11 +6,15 @@ namespace Goldlight.Blazor.VirtualServer.Models;
 [DataContract]
 public class OrganizationMember
 {
-  [DataMember(Name = "userid"), Required, MinLength(4), MaxLength(1024)]
+  [DataMember(Name = "userid"), Required, MinLength(4), MaxLength(1024), EmailAddress]
   public string EmailAddress { get; set; }
 
   [DataMember(Name = "rolename"), Required, MaxLength(20)]
   public string Role { get; set; }
 
   public bool EditEmailAddress { get; set; }
+
+  public bool DeleteEmailAddress { get; set; }
+
+  public bool EmailAddressIsLocked { get; set; }
 }

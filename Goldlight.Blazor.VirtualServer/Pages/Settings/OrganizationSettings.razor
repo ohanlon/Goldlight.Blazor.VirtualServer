@@ -5,6 +5,10 @@
 @inject OrganizationProps Organization
 @inject OrganizationApi OrganizationApi
 @implements IDisposable
+@inject IJSRuntime JSRuntime
+
+<NavigationLock ConfirmExternalNavigation="true" 
+                OnBeforeInternalNavigation="OnBeforeInternalNavigation" />
 <PageTitle>Organization Settings</PageTitle>
 @attribute [Authorize]
 
@@ -20,38 +24,49 @@
     </MudText>
     <MudText Typo="Typo.subtitle2">Friendly name: @organization!.FriendlyName</MudText>
     <MudText Typo="Typo.subtitle2">API Key: @organization!.ApiKey</MudText>
-    <MudForm Model="members" @ref="form" Validation="@(validator.ValidateValue)" ValidationDelay="0">
-      <MudExpansionPanels Dense Class="mt-0" Elevation="0">
-        <MudExpansionPanel Dense Class="mt-0 pl=0" Text="Members" @bind-IsExpanded="membersExpanded">
-          <MudButton OnClick="@(AddMember)" Variant="Variant.Filled" Color="Color.Success">Add Member</MudButton>
-          <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="OrganizationMember" Items="members">
-            <Columns>
-              <PropertyColumn Property="member => member.EmailAddress"/>
-              <TemplateColumn>
-                <CellTemplate>
-                  <MudText>@context.Item.Role</MudText>
-                </CellTemplate>
-                <EditTemplate>
-                  <MudRadioGroup T="string" @bind-SelectedOption="context.Item.Role" Disabled="IsUserThePrimaryUser(context.Item.Role)">
-                    <MudRadio Option="@("PRIMARY OWNER")" Color="Color.Primary" Disabled Dense>Primary Owner</MudRadio>
-                    <MudRadio Option="@("OWNER")" Color="Color.Secondary" Dense>Owner</MudRadio>
-                    <MudRadio Option="@("EDITOR")" Color="Color.Tertiary" Dense>Editor</MudRadio>
-                    <MudRadio Option="@("SUBSCRIBER")" Color="Color.Default" Dense>Subscriber</MudRadio>
-                  </MudRadioGroup>
-                </EditTemplate>
-              </TemplateColumn>
-            </Columns>
-          </MudDataGrid>
-          <MudButton Disabled="submitted" OnClick="async () => await OnSubmitAsync()" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">Save</MudButton>
-        </MudExpansionPanel>
-      </MudExpansionPanels>
-    </MudForm>
+    <DataContainer HasData="Organization.UserHasEditCapabilities">
+      <DataTemplate>
+        <MudForm Model="members" @ref="form" Validation="@(validator.ValidateValue)" ValidationDelay="0">
+          <MudExpansionPanels Dense Class="mt-0" Elevation="0">
+            <MudExpansionPanel Dense Class="mt-0 pl=0" Text="Members" @bind-IsExpanded="membersExpanded">
+              <MudButton OnClick="@(AddMember)" Variant="Variant.Filled" Color="Color.Success">Add Member</MudButton>
+              <MudDataGrid Dense EditMode="DataGridEditMode.Cell" ReadOnly="false" T="OrganizationMember" Items="members">
+                <Columns>
+                  <TemplateColumn Title="Email Address">
+                    <EditTemplate>
+                      <MudTextField @bind-Value="context.Item.EmailAddress" Disabled="context.Item.EmailAddressIsLocked" For="() => context.Item.EmailAddress"></MudTextField>
+                    </EditTemplate>
+                  </TemplateColumn>
+                  <TemplateColumn>
+                    <EditTemplate>
+                      <MudRadioGroup T="string" @bind-SelectedOption="context.Item.Role" Disabled="UserIsPrimaryOwner(context.Item.Role)">
+                        <MudRadio Option="@("PRIMARY OWNER")" Color="Color.Primary" Disabled Dense>Primary Owner</MudRadio>
+                        <MudRadio Option="@("OWNER")" Color="Color.Secondary" Dense>Owner</MudRadio>
+                        <MudRadio Option="@("EDITOR")" Color="Color.Tertiary" Dense>Editor</MudRadio>
+                        <MudRadio Option="@("SUBSCRIBER")" Color="Color.Default" Dense>Subscriber</MudRadio>
+                      </MudRadioGroup>
+                    </EditTemplate>
+                  </TemplateColumn>
+                  <TemplateColumn CellClass="d-flex justify-end">
+                    <EditTemplate>
+                      <MudTooltip Text="Remove this user">
+                        <MudIconButton Disabled="submitted" Icon="@Icons.Material.Filled.Delete" Color="Color.Default" OnClick="@(() => RemoveUser(context.Item))"/>
+                      </MudTooltip>
+                    </EditTemplate>
+                  </TemplateColumn>
+                </Columns>
+              </MudDataGrid>
+              <MudButton Disabled="submitted" OnClick="async () => await OnSubmitAsync()" StartIcon="@Icons.Material.Filled.Save" Variant="Variant.Filled" Color="Color.Primary" Class="mt-2">Save</MudButton>
+            </MudExpansionPanel>
+          </MudExpansionPanels>
+        </MudForm>
+      </DataTemplate>
+    </DataContainer>
   </DataTemplate>
 
 </DataContainer>
 
 @code {
-  // TODO: When editing a user, only the role may be changed. Add the ability to delete members, and update roles on click.
   private Organization? organization;
   private bool membersExpanded = true;
   private MudForm form = null!;
@@ -59,7 +74,7 @@
   private bool submitted;
   private readonly OrganizationMemberValidator validator = new();
 
-  private bool IsUserThePrimaryUser(string role) => role == "PRIMARY OWNER";
+  private bool UserIsPrimaryOwner(string role) => role == "PRIMARY OWNER";
 
   protected override async Task OnInitializedAsync()
   {
@@ -86,6 +101,10 @@
     organization = Organization.SelectedOrganization;
     if (organization is null) return;
     members = await OrganizationApi.GetOrganizationMembers(organization!);
+    foreach (var organizationMember in members!)
+    {
+      organizationMember.EmailAddressIsLocked = true;
+    }
   }
 
   public void Dispose()
@@ -107,10 +126,36 @@
           {
             await OrganizationApi.AddMemberToOrganizationAsync(organization!.Id, organizationMember);
           }
+          if (organizationMember.DeleteEmailAddress)
+          {
+            await OrganizationApi.RemoveUserFromOrganization(organization!.Id, organizationMember.EmailAddress);
+          }
         }
       }
     }
     submitted = false;
+  }
+
+  private async Task OnBeforeInternalNavigation(LocationChangingContext context)
+  {
+    if (!HasUnsavedChanges()) return;
+
+    var isConfirmed = await JSRuntime.InvokeAsync<bool>("confirm", 
+      "There are unsaved changes. Are you sure you want to navigate away from this page?");
+
+    if (!isConfirmed)
+    {
+      context.PreventNavigation();
+    }
+  }
+
+  private bool HasUnsavedChanges() => 
+    members!.Any(organizationMember => organizationMember.DeleteEmailAddress || organizationMember.EditEmailAddress);
+
+  private void RemoveUser(OrganizationMember organizationMember)
+  {
+    organizationMember.DeleteEmailAddress = true;
+    members!.Remove(organizationMember);
   }
 
 }

@@ -34,6 +34,10 @@
 
   private void OrganizationPropsOnPropertyChanged(object? sender, PropertyChangedEventArgs e)
   {
-    StateHasChanged();
+    Task.Run(async () =>
+    {
+      await OrganizationProps.CheckUserEditCapability();
+      StateHasChanged();
+    });
   }
 }

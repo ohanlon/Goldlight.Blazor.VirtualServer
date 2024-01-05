@@ -44,6 +44,9 @@ builder.Services.AddMudServices(config =>
   config.SnackbarConfiguration.HideTransitionDuration = 200;
   config.SnackbarConfiguration.ShowTransitionDuration = 200;
   config.SnackbarConfiguration.SnackbarVariant = Variant.Filled;
+  config.SnackbarConfiguration.ClearAfterNavigation = true;
 });
+
+builder.Services.AddScoped<ISnackbar, SnackbarService>();
 
 await builder.Build().RunAsync();

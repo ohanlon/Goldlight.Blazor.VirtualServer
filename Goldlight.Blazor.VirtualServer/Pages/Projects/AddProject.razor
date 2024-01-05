@@ -32,7 +32,7 @@
     if (result.HasValue && result.Value)
     {
       await ProjectApi.SaveProject(project);
-      NavigationManager.NavigateTo("/");
+      NavigationManager.NavigateTo("/projects");
     }
     submitted = false;
   }

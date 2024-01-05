@@ -7,6 +7,7 @@
 @inject IDialogService DialogService
 @inject Clipboard Clipboard
 @inject IConfiguration Configuration
+@inject ISnackbar Snackbar
 
 @using System.ComponentModel
 @implements IDisposable
@@ -95,7 +96,11 @@
             </MudDataGrid>
           </DataTemplate>
         </DataContainer>
-        <MudButton Disabled="submitting" Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Project</MudButton>
+        <DataContainer HasData="Organization.UserHasEditCapabilities">
+          <DataTemplate>
+            <MudButton Disabled="submitting" Href="/projects/addproject" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Add" Color="Color.Primary" Class="mt-2">Add Project</MudButton>
+          </DataTemplate>
+        </DataContainer>
       </DataTemplate>
     </DataContainer>
   </Loaded>

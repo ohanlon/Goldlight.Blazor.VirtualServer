@@ -10,16 +10,27 @@ public class OrganizationProps : INotifyPropertyChanged
 {
   private readonly OrganizationApi organizationApi;
   private Organization? selectedOrganization;
+  private bool userHasEditCapabilities;
 
   public OrganizationProps(OrganizationApi organizationApi)
   {
     this.organizationApi = organizationApi;
   }
 
+  public bool UserHasEditCapabilities
+  {
+    get => userHasEditCapabilities;
+    private set => SetField(ref userHasEditCapabilities, value);
+  }
+
   public Organization? SelectedOrganization
   {
     get => selectedOrganization;
-    set => SetField(ref selectedOrganization, value);
+    set
+    {
+      UserHasEditCapabilities = false;
+      SetField(ref selectedOrganization, value);
+    }
   }
 
   public ObservableCollection<Organization> Organizations { get; set; } = new();
@@ -30,6 +41,12 @@ public class OrganizationProps : INotifyPropertyChanged
     if (organizations is null || !organizations.Any()) return;
     organizations.ForEach(Organizations.Add);
     SelectedOrganization ??= Organizations[0];
+    await CheckUserEditCapability();
+  }
+
+  public async Task CheckUserEditCapability()
+  {
+    UserHasEditCapabilities = await organizationApi.DoesUserHaveEditCapability(selectedOrganization!.Id);
   }
 
   public event PropertyChangedEventHandler? PropertyChanged;
@@ -47,9 +64,5 @@ public class OrganizationProps : INotifyPropertyChanged
     return true;
   }
 
-  public override string ToString()
-  {
-    if (SelectedOrganization == null) return "<<unset>>";
-    return SelectedOrganization!.FriendlyName;
-  }
+  public override string ToString() => SelectedOrganization == null ? "<<unset>>" : SelectedOrganization!.FriendlyName;
 }
